@@ -7,11 +7,24 @@ import { cn } from '@/lib/utils';
 interface CreditCardStatusProps {
   limit: number;
   used: number;
+  dueDay: number;
+  selectedMonth: Date;
 }
 
-export function CreditCardStatus({ limit, used }: CreditCardStatusProps) {
+export function CreditCardStatus({ limit, used, dueDay, selectedMonth }: CreditCardStatusProps) {
   const available = limit - used;
   const usagePercent = limit > 0 ? (used / limit) * 100 : 0;
+
+  const getBillMonth = () => {
+    const today = new Date();
+    const billMonth = new Date(selectedMonth);
+    
+    if (today.getDate() > dueDay) {
+      billMonth.setMonth(billMonth.getMonth() + 1);
+    }
+    
+    return billMonth.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -52,7 +65,7 @@ export function CreditCardStatus({ limit, used }: CreditCardStatusProps) {
                 status === 'danger' && "text-danger"
               )} />
             </div>
-            <CardTitle className="text-base">Cartão de Crédito</CardTitle>
+            <CardTitle className="text-base">Fatura {getBillMonth()}</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -87,11 +100,14 @@ export function CreditCardStatus({ limit, used }: CreditCardStatusProps) {
               status === 'danger' && "text-danger"
             )}>
               {status === 'danger' 
-                ? '⚠️ Cartão quase no limite!' 
-                : '⚡ Atenção com o uso do cartão'
+                ? '⚠️ Fatura quase no limite!' 
+                : '⚡ Atenção com os gastos'
               }
             </p>
           )}
+          <p className="text-xs text-muted-foreground">
+            Vencimento: dia {dueDay}
+          </p>
         </CardContent>
       </Card>
     </motion.div>

@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { BudgetRule } from '@/types/finance';
 
 interface OnboardingProps {
-  onComplete: (income: number, budgetRule: BudgetRule, creditCardLimit: number) => void;
+  onComplete: (income: number, budgetRule: BudgetRule) => void;
 }
 
 const presetRules = [
@@ -23,16 +23,14 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   const [selectedPreset, setSelectedPreset] = useState(0);
   const [customRule, setCustomRule] = useState<BudgetRule>({ essentials: 50, personal: 30, investments: 20 });
   const [isCustom, setIsCustom] = useState(false);
-  const [creditCardLimit, setCreditCardLimit] = useState('');
 
   const handleNext = () => {
-    if (step < 3) setStep(step + 1);
+    if (step < 2) setStep(step + 1);
     else {
       const rule = isCustom ? customRule : presetRules[selectedPreset];
       onComplete(
         parseFloat(income) || 0,
-        { essentials: rule.essentials, personal: rule.personal, investments: rule.investments },
-        parseFloat(creditCardLimit) || 0
+        { essentials: rule.essentials, personal: rule.personal, investments: rule.investments }
       );
     }
   };
@@ -78,19 +76,17 @@ export function Onboarding({ onComplete }: OnboardingProps) {
             <CardTitle className="text-2xl">
               {step === 1 && 'Qual sua renda mensal?'}
               {step === 2 && 'Como dividir seu dinheiro?'}
-              {step === 3 && 'Limite do cartão de crédito'}
             </CardTitle>
             <CardDescription>
               {step === 1 && 'Informe sua renda líquida mensal para começarmos'}
               {step === 2 && 'Escolha uma regra de divisão ou crie a sua'}
-              {step === 3 && 'Opcional: para controlar seus gastos no cartão'}
             </CardDescription>
           </CardHeader>
           
           <CardContent className="space-y-6 pt-4">
             {/* Progress */}
             <div className="flex gap-2">
-              {[1, 2, 3].map((s) => (
+              {[1, 2].map((s) => (
                 <div
                   key={s}
                   className={`h-1.5 flex-1 rounded-full transition-colors ${
@@ -234,42 +230,13 @@ export function Onboarding({ onComplete }: OnboardingProps) {
               </motion.div>
             )}
 
-            {/* Step 3: Credit Card */}
-            {step === 3 && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="space-y-4"
-              >
-                <div className="space-y-2">
-                  <Label htmlFor="creditLimit">Limite do cartão (opcional)</Label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                      R$
-                    </span>
-                    <Input
-                      id="creditLimit"
-                      type="number"
-                      placeholder="0,00"
-                      value={creditCardLimit}
-                      onChange={(e) => setCreditCardLimit(e.target.value)}
-                      className="pl-10 text-xl font-semibold h-12"
-                    />
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Você pode pular essa etapa e configurar depois
-                  </p>
-                </div>
-              </motion.div>
-            )}
-
             <Button 
               className="w-full" 
               size="lg"
               onClick={handleNext}
               disabled={!isStepValid()}
             >
-              {step < 3 ? (
+              {step < 2 ? (
                 <>
                   Continuar
                   <ArrowRight className="w-4 h-4 ml-2" />

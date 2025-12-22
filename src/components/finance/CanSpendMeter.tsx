@@ -6,9 +6,10 @@ interface CanSpendMeterProps {
   totalRemaining: number;
   totalBudget: number;
   health: 'excellent' | 'good' | 'warning' | 'danger';
+  daysLeft?: number;
 }
 
-export function CanSpendMeter({ totalRemaining, totalBudget, health }: CanSpendMeterProps) {
+export function CanSpendMeter({ totalRemaining, totalBudget, health, daysLeft = 15 }: CanSpendMeterProps) {
   const percentage = totalBudget > 0 ? ((totalBudget - totalRemaining) / totalBudget) * 100 : 0;
   
   const formatCurrency = (value: number) => {
@@ -53,6 +54,15 @@ export function CanSpendMeter({ totalRemaining, totalBudget, health }: CanSpendM
 
   const config = healthConfig[health];
   const canSpend = totalRemaining > 0;
+  const dailyBudget = canSpend ? totalRemaining / daysLeft : 0;
+  
+  const getInsight = () => {
+    if (!canSpend) return 'Revise seus gastos para o próximo mês';
+    if (dailyBudget > 100) return `Você pode gastar R$ ${dailyBudget.toFixed(0)} por dia`;
+    if (dailyBudget > 50) return 'Gastos moderados pelos próximos dias';
+    if (dailyBudget > 20) return 'Seja mais cauteloso com os gastos';
+    return 'Evite gastos desnecessários';
+  };
 
   return (
     <Card variant="primary" className={cn("relative overflow-hidden", config.glow)}>
@@ -80,8 +90,14 @@ export function CanSpendMeter({ totalRemaining, totalBudget, health }: CanSpendM
               {formatCurrency(Math.abs(totalRemaining))}
             </motion.p>
             <p className="text-primary-foreground/70 text-sm">
-              {config.message}
+              {getInsight()}
             </p>
+            {canSpend && daysLeft > 0 && (
+              <div className="flex justify-center gap-4 pt-2 text-xs text-primary-foreground/60">
+                <span>📅 {daysLeft} dias restantes</span>
+                {dailyBudget > 0 && <span>💰 R$ {dailyBudget.toFixed(0)}/dia</span>}
+              </div>
+            )}
           </div>
 
           {/* Circular progress indicator */}

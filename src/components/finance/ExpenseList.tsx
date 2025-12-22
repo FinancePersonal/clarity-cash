@@ -71,6 +71,11 @@ export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
                 <p className="font-medium text-sm truncate">
                   {expense.description || categoryLabels[expense.category]}
                 </p>
+                {expense.installments && (
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                    {expense.installments.current}/{expense.installments.total}x
+                  </span>
+                )}
                 {expense.paymentMethod === 'credit' ? (
                   <CreditCard className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                 ) : (

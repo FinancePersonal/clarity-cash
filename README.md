@@ -1,73 +1,112 @@
-# Welcome to your Lovable project
+# 💰 Clarity Cash - Controle Financeiro Inteligente
 
-## Project info
+## 🚀 Recursos Implementados
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+### ✅ **Funcionalidades Principais**
+- 📊 **Dashboard Intuitivo** com métricas em tempo real
+- 💳 **Múltiplos Cartões** de crédito com controle individual
+- 📱 **Parcelas Automáticas** para compras no cartão
+- 🔄 **Contas Recorrentes** mensais
+- 💰 **Receitas Extras** durante o mês
+- 📅 **Navegação por Mês** com calendário
+- 🌙 **Modo Escuro/Claro**
+- ☁️ **Sincronização na Nuvem** com MongoDB
 
-## How can I edit this code?
+### 📈 **Relatórios e Analytics**
+- 🥧 **Gráfico de Pizza** - Gastos por categoria
+- 📊 **Gráfico de Barras** - Gastos por tipo (Essencial/Pessoal/Investimento)
+- 📈 **Tendência Mensal** - Últimos 6 meses
+- 💾 **Exportar Dados** em JSON
+- 🎯 **Insights Inteligentes** - Gasto diário permitido
 
-There are several ways of editing your application.
+### 📱 **PWA (Progressive Web App)**
+- 🔧 **Instalável** no celular/desktop
+- ⚡ **Cache Offline** para uso sem internet
+- 🔔 **Notificações** (preparado para futuras implementações)
 
-**Use Lovable**
+## 🛠️ **Como Executar**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### **Desenvolvimento Local**
+```bash
+# Frontend
 npm run dev
+
+# Backend (em outro terminal)
+cd server
+npm start
+
+# Ou usar o script automático
+./start.sh
 ```
 
-**Edit a file directly in GitHub**
+### **Deploy em Produção**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+#### **Frontend (Vercel)**
+1. Conecte seu repositório no [Vercel](https://vercel.com)
+2. Configure as variáveis de ambiente:
+   ```
+   VITE_API_URL=https://seu-backend.vercel.app
+   ```
+3. Deploy automático a cada push
 
-**Use GitHub Codespaces**
+#### **Backend (Railway/Render)**
+1. Faça deploy da pasta `server/` 
+2. Configure a variável:
+   ```
+   MONGODB_URI=sua-string-mongodb
+   ```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🔧 **Configuração**
 
-## What technologies are used for this project?
+### **MongoDB**
+1. Crie um cluster no [MongoDB Atlas](https://mongodb.com/atlas)
+2. Configure as variáveis no `.env`:
+   ```
+   MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/clarity-cash
+   VITE_API_URL=http://localhost:3001
+   ```
 
-This project is built with:
+## 📋 **Próximos Passos Sugeridos**
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### **Curto Prazo** ⚡
+- [ ] Autenticação com Google/Apple
+- [ ] Notificações push
+- [ ] Modo offline robusto
+- [ ] Importar/exportar dados
 
-## How can I deploy this project?
+### **Médio Prazo** 🎯
+- [ ] Integração bancária (Open Banking)
+- [ ] IA para categorização automática
+- [ ] Metas de economia
+- [ ] Planejamento financeiro
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### **Longo Prazo** 🚀
+- [ ] App nativo (React Native)
+- [ ] Múltiplas moedas
+- [ ] Consultoria financeira IA
+- [ ] Marketplace financeiro
 
-## Can I connect a custom domain to my Lovable project?
+## 🏗️ **Arquitetura**
 
-Yes, you can!
+```
+Frontend (React + TypeScript)
+    ↓ HTTP Requests
+Backend (Express.js + Node.js)
+    ↓ MongoDB Driver
+Database (MongoDB Atlas)
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 📱 **Como Instalar como App**
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### **Android/iOS**
+1. Abra no navegador
+2. Menu → "Adicionar à tela inicial"
+3. Use como app nativo!
+
+### **Desktop**
+1. Chrome: Ícone de instalação na barra de endereço
+2. Edge: Menu → Apps → Instalar este site
+
+---
+
+**Desenvolvido com ❤️ para simplificar o controle financeiro pessoal**

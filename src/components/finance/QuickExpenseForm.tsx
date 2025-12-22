@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { ExpenseCategory, categoryLabels, categoryIcons } from '@/types/finance';
 
 interface QuickExpenseFormProps {
+  creditCards: any[];
+  selectedMonth: Date;
   onSubmit: (expense: {
     amount: number;
     category: ExpenseCategory;
@@ -15,6 +17,13 @@ interface QuickExpenseFormProps {
     date: Date;
     type: 'essential' | 'personal' | 'investment';
     paymentMethod: 'cash' | 'credit';
+    creditCardId?: string;
+    showInBankStatement?: boolean;
+    installments?: {
+      total: number;
+      current: number;
+      originalAmount: number;
+    };
   }) => void;
 }
 
@@ -31,29 +40,52 @@ const categoryTypeMap: Record<ExpenseCategory, 'essential' | 'personal' | 'inves
   other: 'personal',
 };
 
-export function QuickExpenseForm({ onSubmit }: QuickExpenseFormProps) {
+export function QuickExpenseForm({ creditCards, selectedMonth, onSubmit }: QuickExpenseFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState<ExpenseCategory>('food');
   const [description, setDescription] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'credit'>('cash');
+  const [creditCardId, setCreditCardId] = useState('');
+  const [showInBankStatement, setShowInBankStatement] = useState(false);
+  const [installments, setInstallments] = useState('1');
+  const [currentInstallment, setCurrentInstallment] = useState('1');
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+    return new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), today.getDate());
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || parseFloat(amount) <= 0) return;
 
+    const totalAmount = parseFloat(amount);
+    const installmentCount = parseInt(installments);
+    const installmentAmount = totalAmount / installmentCount;
+
     onSubmit({
-      amount: parseFloat(amount),
+      amount: totalAmount,
       category,
       description: description || undefined,
-      date: new Date(),
+      date: selectedDate,
       type: categoryTypeMap[category],
       paymentMethod,
+      creditCardId: paymentMethod === 'credit' ? creditCardId : undefined,
+      showInBankStatement,
+      installments: paymentMethod === 'credit' && installmentCount > 1 ? {
+        total: installmentCount,
+        current: parseInt(currentInstallment),
+        originalAmount: totalAmount
+      } : undefined,
     });
 
     // Reset form
     setAmount('');
     setDescription('');
+    setCreditCardId('');
+    setShowInBankStatement(false);
+    setInstallments('1');
+    setCurrentInstallment('1');
     setIsOpen(false);
   };
 
@@ -126,6 +158,72 @@ export function QuickExpenseForm({ onSubmit }: QuickExpenseFormProps) {
                       </Button>
                     </div>
                   </div>
+
+                  {/* Credit Card Selection */}
+                  {paymentMethod === 'credit' && creditCards.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>Cartão</Label>
+                      <select 
+                        value={creditCardId} 
+                        onChange={(e) => setCreditCardId(e.target.value)}
+                        className="w-full p-2 border rounded"
+                        required
+                      >
+                        <option value="">Selecione o cartão</option>
+                        {creditCards.map(card => (
+                          <option key={card.id} value={card.id}>{card.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Bank Statement Option */}
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="bankStatement"
+                      checked={showInBankStatement}
+                      onChange={(e) => setShowInBankStatement(e.target.checked)}
+                    />
+                    <Label htmlFor="bankStatement" className="text-sm">
+                      Mostrar no extrato bancário
+                    </Label>
+                  </div>
+
+                  {/* Installments for Credit Card */}
+                  {paymentMethod === 'credit' && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="installments">Parcelas</Label>
+                        <Input
+                          id="installments"
+                          type="number"
+                          placeholder="1"
+                          value={installments}
+                          onChange={(e) => {
+                            setInstallments(e.target.value);
+                            if (parseInt(e.target.value) < parseInt(currentInstallment)) {
+                              setCurrentInstallment(e.target.value);
+                            }
+                          }}
+                          min="1"
+                          max="24"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="current-installment">Parcela Atual</Label>
+                        <Input
+                          id="current-installment"
+                          type="number"
+                          placeholder="1"
+                          value={currentInstallment}
+                          onChange={(e) => setCurrentInstallment(e.target.value)}
+                          min="1"
+                          max={installments}
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   {/* Category */}
                   <div className="space-y-2">
