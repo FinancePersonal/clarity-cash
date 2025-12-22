@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { FinanceState, Expense, Income, RecurringTransaction, BudgetRule, CreditCard } from '@/types/finance';
+import { FinanceState, Expense, Income, RecurringTransaction, BudgetRule, CreditCard, Goal, PlannedPurchase } from '@/types/finance';
 import { generateInstallments } from '@/lib/installments';
 import { getCreditCardUsageForMonth } from '@/lib/creditCard';
 import { financeService } from '@/lib/financeService';
@@ -14,6 +14,9 @@ const defaultState: FinanceState = {
   incomes: [],
   recurringTransactions: [],
   creditCards: [],
+  goals: [],
+  alerts: [],
+  plannedPurchases: [],
   isOnboarded: false,
   selectedMonth: new Date(),
 };
