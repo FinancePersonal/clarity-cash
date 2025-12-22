@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ExpenseCategory, categoryLabels, categoryIcons } from '@/types/finance';
+import { Calendar } from '../ui/calendar';
 
 interface QuickExpenseFormProps {
   creditCards: any[];
@@ -54,6 +55,10 @@ export function QuickExpenseForm({ creditCards, selectedMonth, onSubmit }: Quick
     const today = new Date();
     return new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), today.getDate());
   });
+
+    const formatDateForInput = (date: Date) => {
+    return date.toISOString().split('T')[0];
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -248,6 +253,22 @@ export function QuickExpenseForm({ creditCards, selectedMonth, onSubmit }: Quick
                         </button>
                       ))}
                     </div>
+                         {/* Date */}
+                   <div className="space-y-2">
+                  <Label htmlFor="income-date">Data</Label>
+                    <div className="relative">
+                      <Input
+                        id="income-date"
+                        type="date"
+                        value={formatDateForInput(selectedDate)}
+                        onChange={(e) => setSelectedDate(new Date(e.target.value))}
+                        className="pl-10"
+                        min={formatDateForInput(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1))}
+                        max={formatDateForInput(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0))}
+                        required
+                      />
+                    </div>
+                  </div>
                   </div>
 
                   {/* Description */}
@@ -259,8 +280,7 @@ export function QuickExpenseForm({ creditCards, selectedMonth, onSubmit }: Quick
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                     />
-                  </div>
-
+                  </div>                
                   <Button type="submit" className="w-full" size="lg">
                     Adicionar Gasto
                   </Button>
