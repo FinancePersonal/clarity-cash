@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Settings, RefreshCw, ChevronLeft, ChevronRight, Calendar, Moon, Sun, TrendingUp, Target, LogOut } from 'lucide-react';
+import { Settings, RefreshCw, ChevronLeft, ChevronRight, Calendar, Moon, Sun, TrendingUp, Target, LogOut, History } from 'lucide-react';
 import { userService } from '@/lib/userService';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -112,6 +112,11 @@ export function Header({ selectedMonth, onMonthChange, onReset }: HeaderProps) {
         <Button variant="ghost" size="icon" onClick={toggleTheme} title="Alternar tema">
           {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </Button>
+        <Link to="/history">
+          <Button variant="ghost" size="icon" title="Histórico">
+            <History className="w-4 h-4" />
+          </Button>
+        </Link>
         <Link to="/reports">
           <Button variant="ghost" size="icon" title="Relatórios">
             <TrendingUp className="w-4 h-4" />
