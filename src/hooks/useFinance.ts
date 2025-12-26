@@ -30,39 +30,12 @@ export function useFinance() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        let localData = defaultState;
-        
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          localData = {
-            ...parsed,
-            expenses: parsed.expenses?.map((e: Expense) => ({
-              ...e,
-              date: new Date(e.date),
-            })) || [],
-            incomes: parsed.incomes?.map((i: Income) => ({
-              ...i,
-              date: new Date(i.date),
-            })) || [],
-            recurringTransactions: parsed.recurringTransactions || [],
-            creditCards: parsed.creditCards || [],
-            goals: (parsed.goals || []).map((g: any) => ({
-          ...g,
-          deadline: new Date(g.deadline),
-          createdAt: new Date(g.createdAt),
-        })),
-            alerts: parsed.alerts || [],
-            plannedPurchases: parsed.plannedPurchases || [],
-            selectedMonth: new Date(),
-          };
-        }
-        
-        const syncedData = await financeService.syncData(userId, localData);
+        // Sempre carregar do servidor, não do localStorage
+        const syncedData = await financeService.syncData(userId, defaultState);
         setState(syncedData);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(syncedData));
       } catch (error) {
         console.error('Error loading data:', error);
+        setState(defaultState);
       } finally {
         setIsLoading(false);
       }
@@ -75,7 +48,6 @@ export function useFinance() {
     if (isLoading) return;
     try {
       setIsSyncing(true);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
       await financeService.saveUserData(userId, newState);
     } catch (error) {
       console.error('Error saving to cloud:', error);
@@ -266,7 +238,6 @@ export function useFinance() {
 
   const resetData = useCallback(() => {
     setState(defaultState);
-    localStorage.removeItem(STORAGE_KEY);
   }, []);
 
   const getCreditCardUsage = useCallback((cardId: string) => {

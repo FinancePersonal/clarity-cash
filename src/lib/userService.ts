@@ -26,7 +26,6 @@ class UserService {
 
   logout(): void {
     authService.logout();
-    localStorage.removeItem('clarity-cash-user-id');
   }
 }
 
