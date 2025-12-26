@@ -33,20 +33,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!user) {
       // Criar novo usuário se não existir
       const newUser = {
-        id: `user_${Date.now()}`,
         email,
         name: email.split('@')[0],
+        password,
         createdAt: new Date()
       };
       
-      const result = await users.insertOne({ ...newUser, password });
+      const result = await users.insertOne(newUser);
       user = { ...newUser, _id: result.insertedId };
     }
 
     return res.json({
-      token: `token_${user.id || user._id}_${Date.now()}`,
+      token: `token_${user._id}_${Date.now()}`,
       user: {
-        id: user.id || user._id.toString(),
+        id: user._id.toString(),
         email: user.email,
         name: user.name
       }

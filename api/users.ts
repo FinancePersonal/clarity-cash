@@ -1,5 +1,5 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { MongoClient } from 'mongodb';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { MongoClient, ObjectId } from 'mongodb';
 
 const client = new MongoClient(process.env.MONGODB_URI!);
 let isConnected = false;
@@ -25,41 +25,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const db = await connectDB();
     const users = db.collection('users');
-    const financeData = db.collection('finance-data');
 
     switch (req.method) {
       case 'GET':
-        // Buscar usuário na collection users
-        { const user = await users.findOne({ _id: new client.db().admin().command({ convertToCapped: false }).constructor.ObjectId ? new (await import('mongodb')).ObjectId(userId.replace('user_', '')) : null });
-        if (!user) {
-          // Buscar por userId customizado se não encontrar por ObjectId
-          const userByCustomId = await users.findOne({ id: userId });
-          if (!userByCustomId) {
-            return res.status(404).json({ error: 'User not found' });
-          }
-          // Buscar dados financeiros usando o _id do usuário
-          const financeDoc = await financeData.findOne({ userId: userByCustomId._id.toString() });
-          return financeDoc ? res.json(financeDoc) : res.status(404).json({ error: 'Finance data not found' });
-        }
-
-        // Buscar dados financeiros usando o _id do usuário
-        const financeDoc = await financeData.findOne({ userId: user._id.toString() });
-        return financeDoc ? res.json(financeDoc) : res.status(404).json({ error: 'Finance data not found' }); }
+        const user = await users.findOne({ _id: new ObjectId(userId as string) });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        
+        const { _id, email, password, name, createdAt, ...financeData } = user;
+        return res.json(financeData);
 
       case 'PUT':
-        // Buscar usuário para pegar o _id
-        { const userForUpdate = await users.findOne({ id: userId });
-        if (!userForUpdate) {
-          return res.status(404).json({ error: 'User not found' });
-        }
-
-        // Salvar dados financeiros na collection finance-data
-        await financeData.updateOne(
-          { userId: userForUpdate._id.toString() },
-          { $set: { ...req.body, userId: userForUpdate._id.toString(), updatedAt: new Date() } },
-          { upsert: true }
+        await users.updateOne(
+          { _id: new ObjectId(userId as string) },
+          { $set: { ...req.body, updatedAt: new Date() } }
         );
-        return res.json({ success: true }); }
+        return res.json({ success: true });
 
       default:
         return res.status(405).json({ error: 'Method not allowed' });

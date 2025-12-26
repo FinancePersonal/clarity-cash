@@ -35,18 +35,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     // Criar novo usuário
     const newUser = {
-      id: `user_${Date.now()}`,
       email,
       name,
+      password,
       createdAt: new Date()
     };
     
-    await users.insertOne({ ...newUser, password });
+    const result = await users.insertOne(newUser);
 
     return res.json({
-      token: `token_${newUser.id}_${Date.now()}`,
+      token: `token_${result.insertedId}_${Date.now()}`,
       user: {
-        id: newUser.id,
+        id: result.insertedId.toString(),
         email: newUser.email,
         name: newUser.name
       }
