@@ -22,14 +22,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     for (const finance of allFinanceData) {
       const { _id, userId, ...financeFields } = finance;
       
-      // Atualizar usuário com dados financeiros
-      const result = await users.updateOne(
-        { _id: new ObjectId(userId) },
-        { $set: financeFields }
-      );
-      
-      if (result.modifiedCount > 0) {
-        migrated++;
+      try {
+        // Tentar converter userId para ObjectId
+        let userObjectId;
+        if (ObjectId.isValid(userId)) {
+          userObjectId = new ObjectId(userId);
+        } else {
+          // Se não for ObjectId válido, buscar usuário por email ou outro campo
+          console.log('Invalid ObjectId:', userId);
+          continue;
+        }
+        
+        // Atualizar usuário com dados financeiros
+        const result = await users.updateOne(
+          { _id: userObjectId },
+          { $set: financeFields }
+        );
+        
+        if (result.modifiedCount > 0) {
+          migrated++;
+        }
+      } catch (err) {
+        console.log('Error processing finance record:', userId, err);
+        continue;
       }
     }
 
