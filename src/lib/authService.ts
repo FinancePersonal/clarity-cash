@@ -10,7 +10,7 @@ interface AuthResponse {
 }
 
 class AuthService {
-  private apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  private apiUrl = '/api';
   private tokenKey = 'clarity-cash-token';
   private userKey = 'clarity-cash-user';
 
