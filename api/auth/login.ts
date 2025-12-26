@@ -39,14 +39,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         createdAt: new Date()
       };
       
-      await users.insertOne({ ...newUser, password });
-      user = newUser;
+      const result = await users.insertOne({ ...newUser, password });
+      user = { ...newUser, _id: result.insertedId };
     }
 
     return res.json({
-      token: `token_${user.id}_${Date.now()}`,
+      token: `token_${user.id || user._id}_${Date.now()}`,
       user: {
-        id: user.id,
+        id: user.id || user._id.toString(),
         email: user.email,
         name: user.name
       }

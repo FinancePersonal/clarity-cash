@@ -24,25 +24,42 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const db = await connectDB();
-    const collection = db.collection('users');
+    const users = db.collection('users');
+    const financeData = db.collection('finance-data');
 
     switch (req.method) {
       case 'GET':
-        const user = await collection.findOne({ userId });
+        // Buscar usuário na collection users
+        { const user = await users.findOne({ _id: new client.db().admin().command({ convertToCapped: false }).constructor.ObjectId ? new (await import('mongodb')).ObjectId(userId.replace('user_', '')) : null });
         if (!user) {
-          return res.status(404).json({ error: 'Not found' });
+          // Buscar por userId customizado se não encontrar por ObjectId
+          const userByCustomId = await users.findOne({ id: userId });
+          if (!userByCustomId) {
+            return res.status(404).json({ error: 'User not found' });
+          }
+          // Buscar dados financeiros usando o _id do usuário
+          const financeDoc = await financeData.findOne({ userId: userByCustomId._id.toString() });
+          return financeDoc ? res.json(financeDoc) : res.status(404).json({ error: 'Finance data not found' });
         }
-        // Retornar os dados sem o _id e userId
-        const { _id, userId: uid, ...userData } = user;
-        return res.json(userData);
+
+        // Buscar dados financeiros usando o _id do usuário
+        const financeDoc = await financeData.findOne({ userId: user._id.toString() });
+        return financeDoc ? res.json(financeDoc) : res.status(404).json({ error: 'Finance data not found' }); }
 
       case 'PUT':
-        await collection.updateOne(
-          { userId },
-          { $set: { ...req.body, userId, updatedAt: new Date() } },
+        // Buscar usuário para pegar o _id
+        { const userForUpdate = await users.findOne({ id: userId });
+        if (!userForUpdate) {
+          return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Salvar dados financeiros na collection finance-data
+        await financeData.updateOne(
+          { userId: userForUpdate._id.toString() },
+          { $set: { ...req.body, userId: userForUpdate._id.toString(), updatedAt: new Date() } },
           { upsert: true }
         );
-        return res.json({ success: true });
+        return res.json({ success: true }); }
 
       default:
         return res.status(405).json({ error: 'Method not allowed' });
