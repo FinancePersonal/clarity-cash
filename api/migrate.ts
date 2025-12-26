@@ -40,8 +40,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   } catch (error) {
     console.error('Migration error:', error);
-    return res.status(500).json({ error: 'Migration failed' });
+    return res.status(500).json({ 
+      error: 'Migration failed', 
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
   } finally {
-    await client.close();
+    // Não fechar conexão na Vercel
   }
 }
