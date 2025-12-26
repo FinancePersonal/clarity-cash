@@ -2,11 +2,11 @@ import { FinanceState } from '@/types/finance';
 import { authService } from './authService';
 
 class FinanceService {
-  private apiUrl = import.meta.env.VITE_API_URL || '/api';
+  private apiUrl = '/api';
 
   async saveUserData(userId: string, data: FinanceState): Promise<void> {
     try {
-      const response = await fetch(`${this.apiUrl}/users/${userId}/data`, {
+      const response = await fetch(`${this.apiUrl}/users?userId=${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -29,7 +29,7 @@ class FinanceService {
 
   async getUserData(userId: string): Promise<FinanceState | null> {
     try {
-      const response = await fetch(`${this.apiUrl}/users/${userId}/data`, {
+      const response = await fetch(`${this.apiUrl}/users?userId=${userId}`, {
         headers: {
           ...authService.getAuthHeaders(),
         },
