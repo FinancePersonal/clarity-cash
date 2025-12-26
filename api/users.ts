@@ -1,8 +1,18 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { MongoClient } from 'mongodb';
 
-const users = new Map();
+const client = new MongoClient(process.env.MONGODB_URI!);
+let isConnected = false;
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+async function connectDB() {
+  if (!isConnected) {
+    await client.connect();
+    isConnected = true;
+  }
+  return client.db('clarity-cash');
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -12,16 +22,28 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   const { userId } = req.query;
   if (!userId) return res.status(400).json({ error: 'User ID required' });
 
-  switch (req.method) {
-    case 'GET':
-      { const data = users.get(userId);
-      return data ? res.json(data) : res.status(404).json({ error: 'Not found' }); }
+  try {
+    const db = await connectDB();
+    const collection = db.collection('users');
 
-    case 'PUT':
-      users.set(userId, { ...req.body, updatedAt: new Date().toISOString() });
-      return res.json({ success: true });
+    switch (req.method) {
+      case 'GET':
+        const user = await collection.findOne({ userId });
+        return user ? res.json(user.data) : res.status(404).json({ error: 'Not found' });
 
-    default:
-      return res.status(405).json({ error: 'Method not allowed' });
+      case 'PUT':
+        await collection.updateOne(
+          { userId },
+          { $set: { data: req.body, updatedAt: new Date() } },
+          { upsert: true }
+        );
+        return res.json({ success: true });
+
+      default:
+        return res.status(405).json({ error: 'Method not allowed' });
+    }
+  } catch (error) {
+    console.error('Database error:', error);
+    return res.status(500).json({ error: 'Database error' });
   }
 }
