@@ -3,7 +3,6 @@ import { Settings, RefreshCw, ChevronLeft, ChevronRight, Calendar, Moon, Sun, Tr
 import { userService } from '@/lib/userService';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
@@ -82,13 +81,56 @@ export function Header({ selectedMonth, onMonthChange, onReset }: HeaderProps) {
                 <span className="capitalize font-medium">{currentMonth}</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <CalendarComponent
-                mode="single"
-                selected={selectedMonth}
-                onSelect={(date) => date && onMonthChange(date)}
-                initialFocus
-              />
+            <PopoverContent className="w-80 p-4" align="start">
+              <div className="space-y-4">
+                <div className="text-sm font-medium text-center">Selecionar Mês</div>
+                <div className="grid grid-cols-3 gap-2">
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const monthDate = new Date(selectedMonth.getFullYear(), i, 1);
+                    const monthName = new Intl.DateTimeFormat('pt-BR', { month: 'short' }).format(monthDate);
+                    const isSelected = selectedMonth.getMonth() === i;
+                    const isCurrent = new Date().getMonth() === i && new Date().getFullYear() === selectedMonth.getFullYear();
+                    
+                    return (
+                      <Button
+                        key={i}
+                        variant={isSelected ? 'default' : 'outline'}
+                        size="sm"
+                        className={`capitalize ${isCurrent ? 'ring-2 ring-blue-500' : ''}`}
+                        onClick={() => {
+                          const newDate = new Date(selectedMonth.getFullYear(), i, 1);
+                          onMonthChange(newDate);
+                        }}
+                      >
+                        {monthName}
+                      </Button>
+                    );
+                  })}
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const newDate = new Date(selectedMonth.getFullYear() - 1, selectedMonth.getMonth(), 1);
+                      onMonthChange(newDate);
+                    }}
+                  >
+                    {selectedMonth.getFullYear() - 1}
+                  </Button>
+                  <span className="font-medium">{selectedMonth.getFullYear()}</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const newDate = new Date(selectedMonth.getFullYear() + 1, selectedMonth.getMonth(), 1);
+                      onMonthChange(newDate);
+                    }}
+                  >
+                    {selectedMonth.getFullYear() + 1}
+                  </Button>
+                </div>
+              </div>
             </PopoverContent>
           </Popover>
           

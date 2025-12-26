@@ -74,13 +74,21 @@ export interface MonthlyData {
 export interface Goal {
   id: string;
   title: string;
+  description?: string;
   targetAmount: number;
   currentAmount: number;
   deadline: Date;
-  category: 'savings' | 'purchase' | 'investment' | 'debt';
-  priority: 'low' | 'medium' | 'high';
+  category?: string;
+  priority?: 'low' | 'medium' | 'high';
   isActive: boolean;
   createdAt: Date;
+  smartCriteria?: {
+    specific: string;
+    measurable: string;
+    achievable: string;
+    relevant: string;
+    timebound: string;
+  };
 }
 
 export interface Alert {

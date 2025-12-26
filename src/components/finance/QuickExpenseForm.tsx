@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, CreditCard, Wallet } from 'lucide-react';
+import { Plus, X, CreditCard, Wallet, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ExpenseCategory, categoryLabels, categoryIcons } from '@/types/finance';
-import { Calendar } from '../ui/calendar';
+import type { CreditCard } from '@/types/finance';
 
 interface QuickExpenseFormProps {
-  creditCards: any[];
+  creditCards: CreditCard[];
   selectedMonth: Date;
   onSubmit: (expense: {
     amount: number;
@@ -29,11 +29,11 @@ interface QuickExpenseFormProps {
 }
 
 const categoryTypeMap: Record<ExpenseCategory, 'essential' | 'personal' | 'investment'> = {
-  housing: 'essential',
-  food: 'essential',
-  transport: 'essential',
-  health: 'essential',
-  education: 'essential',
+  housing: 'personal',
+  food: 'personal',
+  transport: 'personal',
+  health: 'personal',
+  education: 'personal',
   entertainment: 'personal',
   shopping: 'personal',
   subscription: 'personal',
@@ -50,39 +50,72 @@ export function QuickExpenseForm({ creditCards, selectedMonth, onSubmit }: Quick
   const [creditCardId, setCreditCardId] = useState('');
   const [showInBankStatement, setShowInBankStatement] = useState(false);
   const [installments, setInstallments] = useState('1');
-  const [currentInstallment, setCurrentInstallment] = useState('1');
-  const [selectedDate, setSelectedDate] = useState(() => {
-    const today = new Date();
-    return new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), today.getDate());
+  const [firstInstallmentMonth, setFirstInstallmentMonth] = useState(() => {
+    return `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`;
   });
 
-    const formatDateForInput = (date: Date) => {
-    return date.toISOString().split('T')[0];
-  };
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || parseFloat(amount) <= 0) return;
+    if (paymentMethod === 'credit' && !creditCardId) {
+      alert('Selecione um cartão de crédito');
+      return;
+    }
 
     const totalAmount = parseFloat(amount);
     const installmentCount = parseInt(installments);
-    const installmentAmount = totalAmount / installmentCount;
+    
+    // Parse do mês da primeira parcela
+    const [year, month] = firstInstallmentMonth.split('-').map(Number);
+    const firstInstallmentDate = new Date(year, month - 1, 1);
+    
+    // Validação: não permitir parcelas muito no passado
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    
+    if (paymentMethod === 'credit' && installmentCount > 1 && firstInstallmentDate < threeMonthsAgo) {
+      alert('A primeira parcela não pode ser muito antiga. Selecione um mês mais recente.');
+      return;
+    }
 
-    onSubmit({
-      amount: totalAmount,
-      category,
-      description: description || undefined,
-      date: selectedDate,
-      type: categoryTypeMap[category],
-      paymentMethod,
-      creditCardId: paymentMethod === 'credit' ? creditCardId : undefined,
-      showInBankStatement,
-      installments: paymentMethod === 'credit' && installmentCount > 1 ? {
-        total: installmentCount,
-        current: parseInt(currentInstallment),
-        originalAmount: totalAmount
-      } : undefined,
-    });
+    // Para compras parceladas, criar múltiplas despesas
+    if (paymentMethod === 'credit' && installmentCount > 1) {
+      const installmentAmount = totalAmount / installmentCount;
+      
+      for (let i = 0; i < installmentCount; i++) {
+        const installmentDate = new Date(year, month - 1 + i, selectedMonth.getDate());
+        
+        onSubmit({
+          amount: installmentAmount,
+          category,
+          description: `${description || categoryLabels[category]} (${i + 1}/${installmentCount})`,
+          date: installmentDate,
+          type: categoryTypeMap[category],
+          paymentMethod,
+          creditCardId,
+          showInBankStatement,
+          installments: {
+            total: installmentCount,
+            current: i + 1,
+            originalAmount: totalAmount
+          }
+        });
+      }
+    } else {
+      // Compra à vista ou parcela única
+      onSubmit({
+        amount: totalAmount,
+        category,
+        description: description || undefined,
+        date: new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), selectedMonth.getDate()),
+        type: categoryTypeMap[category],
+        paymentMethod,
+        creditCardId: paymentMethod === 'credit' ? creditCardId : undefined,
+        showInBankStatement
+      });
+    }
 
     // Reset form
     setAmount('');
@@ -90,7 +123,7 @@ export function QuickExpenseForm({ creditCards, selectedMonth, onSubmit }: Quick
     setCreditCardId('');
     setShowInBankStatement(false);
     setInstallments('1');
-    setCurrentInstallment('1');
+    setFirstInstallmentMonth(`${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`);
     setIsOpen(false);
   };
 
@@ -105,9 +138,9 @@ export function QuickExpenseForm({ creditCards, selectedMonth, onSubmit }: Quick
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="absolute bottom-16 right-0 w-80 md:w-96"
+            className="absolute bottom-16 right-0 left-4 sm:left-auto sm:right-0 w-auto sm:w-80 md:w-96 max-h-[80vh] overflow-y-auto"
           >
-            <Card className="shadow-2xl border-border/50">
+            <Card className="shadow-2xl border-border/50 mx-auto">
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">Novo Gasto</CardTitle>
@@ -117,12 +150,12 @@ export function QuickExpenseForm({ creditCards, selectedMonth, onSubmit }: Quick
                 </div>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-3">
                   {/* Amount */}
                   <div className="space-y-2">
                     <Label htmlFor="amount">Valor</Label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm z-10">
                         R$
                       </span>
                       <Input
@@ -146,19 +179,27 @@ export function QuickExpenseForm({ creditCards, selectedMonth, onSubmit }: Quick
                       <Button
                         type="button"
                         variant={paymentMethod === 'cash' ? 'default' : 'outline'}
-                        onClick={() => setPaymentMethod('cash')}
-                        className="w-full"
+                        onClick={() => {
+                          setPaymentMethod('cash');
+                          setFirstInstallmentMonth(`${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`);
+                        }}
+                        className="w-full text-xs sm:text-sm"
+                        size="sm"
                       >
-                        <Wallet className="w-4 h-4 mr-2" />
+                        <Wallet className="w-3 h-3 mr-1" />
                         À vista
                       </Button>
                       <Button
                         type="button"
                         variant={paymentMethod === 'credit' ? 'default' : 'outline'}
-                        onClick={() => setPaymentMethod('credit')}
-                        className="w-full"
+                        onClick={() => {
+                          setPaymentMethod('credit');
+                          setFirstInstallmentMonth(`${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`);
+                        }}
+                        className="w-full text-xs sm:text-sm"
+                        size="sm"
                       >
-                        <CreditCard className="w-4 h-4 mr-2" />
+                        <CreditCard className="w-3 h-3 mr-1" />
                         Cartão
                       </Button>
                     </div>
@@ -197,78 +238,65 @@ export function QuickExpenseForm({ creditCards, selectedMonth, onSubmit }: Quick
 
                   {/* Installments for Credit Card */}
                   {paymentMethod === 'credit' && (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="installments">Parcelas</Label>
+                        <Label htmlFor="installments">Número de Parcelas</Label>
                         <Input
                           id="installments"
                           type="number"
                           placeholder="1"
                           value={installments}
-                          onChange={(e) => {
-                            setInstallments(e.target.value);
-                            if (parseInt(e.target.value) < parseInt(currentInstallment)) {
-                              setCurrentInstallment(e.target.value);
-                            }
-                          }}
+                          onChange={(e) => setInstallments(e.target.value)}
                           min="1"
                           max="24"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="current-installment">Parcela Atual</Label>
-                        <Input
-                          id="current-installment"
-                          type="number"
-                          placeholder="1"
-                          value={currentInstallment}
-                          onChange={(e) => setCurrentInstallment(e.target.value)}
-                          min="1"
-                          max={installments}
-                        />
-                      </div>
+                      
+                      {parseInt(installments) > 1 && (
+                        <div className="space-y-2">
+                          <Label htmlFor="first-installment-month">Mês da 1ª Parcela</Label>
+                          <div className="relative">
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input
+                              id="first-installment-month"
+                              type="month"
+                              value={firstInstallmentMonth}
+                              onChange={(e) => setFirstInstallmentMonth(e.target.value)}
+                              className="pl-10"
+                              required
+                            />
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Valor por parcela: R$ {(parseFloat(amount || '0') / parseInt(installments)).toFixed(2)}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
                   {/* Category */}
                   <div className="space-y-2">
                     <Label>Categoria</Label>
-                    <div className="grid grid-cols-5 gap-2">
+                    <div className="grid grid-cols-5 gap-1 sm:gap-2">
                       {categories.map(([key, label]) => (
                         <button
                           key={key}
                           type="button"
                           onClick={() => setCategory(key)}
-                          className={`flex flex-col items-center p-2 rounded-xl text-xs transition-all ${
+                          className={`flex flex-col items-center p-1.5 sm:p-2 rounded-xl text-xs transition-all ${
                             category === key
                               ? 'bg-primary/10 text-primary ring-2 ring-primary'
                               : 'bg-muted hover:bg-muted/80 text-muted-foreground'
                           }`}
                           title={label}
                         >
-                          <span className="text-lg mb-1">{categoryIcons[key]}</span>
-                          <span className="truncate w-full text-center text-[10px]">
+                          <span className="text-base sm:text-lg mb-0.5 sm:mb-1">{categoryIcons[key]}</span>
+                          <span className="truncate w-full text-center text-[9px] sm:text-[10px]">
                             {label.split(' ')[0]}
                           </span>
                         </button>
                       ))}
                     </div>
-                         {/* Date */}
-                   <div className="space-y-2">
-                  <Label htmlFor="income-date">Data</Label>
-                    <div className="relative">
-                      <Input
-                        id="income-date"
-                        type="date"
-                        value={formatDateForInput(selectedDate)}
-                        onChange={(e) => setSelectedDate(new Date(e.target.value))}
-                        className="pl-10"
-                        min={formatDateForInput(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1))}
-                        max={formatDateForInput(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0))}
-                        required
-                      />
-                    </div>
-                  </div>
                   </div>
 
                   {/* Description */}

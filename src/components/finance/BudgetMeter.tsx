@@ -57,12 +57,17 @@ export function BudgetMeter({ spent, budget, label, showAmount = true, size = 'm
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-foreground">{label}</span>
         {showAmount && (
-          <span className={cn(
-            "text-sm font-semibold",
-            overBudget ? "text-danger" : "text-muted-foreground"
-          )}>
-            {formatCurrency(spent)} / {formatCurrency(budget)}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className={cn(
+              "text-sm font-semibold",
+              overBudget ? "text-danger" : "text-muted-foreground"
+            )}>
+              {formatCurrency(spent)} / {formatCurrency(budget)}
+            </span>
+            <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+              {percentage.toFixed(0)}%
+            </span>
+          </div>
         )}
       </div>
       
@@ -88,9 +93,6 @@ export function BudgetMeter({ spent, budget, label, showAmount = true, size = 'm
             ? `Estourou ${formatCurrency(Math.abs(remaining))}`
             : `Disponível: ${formatCurrency(remaining)}`
           }
-        </span>
-        <span className="text-muted-foreground">
-          {percentage.toFixed(0)}% usado
         </span>
       </div>
     </div>

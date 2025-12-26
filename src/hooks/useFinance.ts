@@ -47,7 +47,11 @@ export function useFinance() {
             })) || [],
             recurringTransactions: parsed.recurringTransactions || [],
             creditCards: parsed.creditCards || [],
-            goals: parsed.goals || [],
+            goals: (parsed.goals || []).map((g: any) => ({
+          ...g,
+          deadline: new Date(g.deadline),
+          createdAt: new Date(g.createdAt),
+        })),
             alerts: parsed.alerts || [],
             plannedPurchases: parsed.plannedPurchases || [],
             selectedMonth: new Date(),
@@ -94,23 +98,15 @@ export function useFinance() {
   }, []);
 
   const addExpense = useCallback((expense: Omit<Expense, 'id'>) => {
-    const expenseDate = expense.date || new Date(state.selectedMonth.getFullYear(), state.selectedMonth.getMonth(), 1);
     const newExpense: Expense = {
       ...expense,
       id: crypto.randomUUID(),
-      date: expenseDate,
-      installments: expense.installments ? {
-        ...expense.installments,
-        originalAmount: expense.installments.originalAmount || expense.amount
-      } : undefined
+      date: expense.date || new Date(state.selectedMonth.getFullYear(), state.selectedMonth.getMonth(), 1)
     };
-    
-    // Generate all installments if it's a credit card purchase with multiple installments
-    const installments = generateInstallments(newExpense);
     
     setState(prev => ({
       ...prev,
-      expenses: [...prev.expenses, ...installments],
+      expenses: [...prev.expenses, newExpense],
     }));
   }, [state.selectedMonth]);
 
@@ -192,6 +188,7 @@ export function useFinance() {
       ...goal,
       id: crypto.randomUUID(),
       createdAt: new Date(),
+      deadline: new Date(goal.deadline),
     };
     setState(prev => ({
       ...prev,
@@ -224,10 +221,35 @@ export function useFinance() {
   }, []);
 
   const removeExpense = useCallback((id: string) => {
-    setState(prev => ({
-      ...prev,
-      expenses: prev.expenses.filter(e => e.id !== id),
-    }));
+    setState(prev => {
+      const expenseToRemove = prev.expenses.find(e => e.id === id);
+      
+      if (expenseToRemove?.installments) {
+        // Para parcelas, encontrar todas as parcelas relacionadas
+        // Assumindo que parcelas relacionadas têm descrições similares e mesmo valor original
+        const { originalAmount, total } = expenseToRemove.installments;
+        
+        return {
+          ...prev,
+          expenses: prev.expenses.filter(e => {
+            // Remove se for a mesma compra parcelada
+            if (e.installments && 
+                e.installments.originalAmount === originalAmount && 
+                e.installments.total === total &&
+                e.description?.includes(`/${total})`)) {
+              return false;
+            }
+            return e.id !== id;
+          })
+        };
+      }
+      
+      // Para despesas normais, remover apenas a específica
+      return {
+        ...prev,
+        expenses: prev.expenses.filter(e => e.id !== id)
+      };
+    });
   }, []);
 
   const updateIncome = useCallback((income: number) => {

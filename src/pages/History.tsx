@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, TrendingUp, TrendingDown, Minus, Calendar } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Minus, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useFinance } from '@/hooks/useFinance';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +21,7 @@ import {
 
 const History = () => {
   const finance = useFinance();
+  const [selectedMonth, setSelectedMonth] = useState(new Date());
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -30,6 +31,45 @@ const History = () => {
       maximumFractionDigits: 0,
     }).format(value);
   };
+
+  const goToPreviousMonth = () => {
+    const newMonth = new Date(selectedMonth);
+    newMonth.setMonth(newMonth.getMonth() - 1);
+    setSelectedMonth(newMonth);
+  };
+
+  const goToNextMonth = () => {
+    const newMonth = new Date(selectedMonth);
+    newMonth.setMonth(newMonth.getMonth() + 1);
+    setSelectedMonth(newMonth);
+  };
+
+  const currentMonth = new Intl.DateTimeFormat('pt-BR', { 
+    month: 'long', 
+    year: 'numeric' 
+  }).format(selectedMonth);
+
+  // Current month data
+  const currentMonthExpenses = finance.expenses.filter(e => {
+    return e.date.getMonth() === selectedMonth.getMonth() && 
+           e.date.getFullYear() === selectedMonth.getFullYear();
+  });
+
+  const currentMonthIncomes = finance.incomes.filter(i => {
+    return i.date.getMonth() === selectedMonth.getMonth() && 
+           i.date.getFullYear() === selectedMonth.getFullYear();
+  });
+
+  const totalSpent = currentMonthExpenses.reduce((sum, e) => sum + e.amount, 0) + 
+    finance.recurringTransactions
+      .filter(t => t.isActive && t.type === 'expense')
+      .reduce((sum, t) => sum + t.amount, 0);
+
+  const totalIncome = finance.income + 
+    currentMonthIncomes.reduce((sum, i) => sum + i.amount, 0) + 
+    finance.recurringTransactions
+      .filter(t => t.isActive && t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0);
 
   // Generate last 6 months data
   const monthlyData = useMemo(() => {
@@ -167,55 +207,69 @@ const History = () => {
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4 mb-8"
+          className="flex items-center justify-between mb-8"
         >
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/">
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Histórico Mensal</h1>
-            <p className="text-sm text-muted-foreground">Comparação e evolução dos seus gastos</p>
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/">
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Histórico</h1>
+              <p className="text-sm text-muted-foreground">Acompanhe seus gastos por mês</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={goToPreviousMonth}>
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <div className="min-w-[180px] text-center">
+              <span className="capitalize font-medium">{currentMonth}</span>
+            </div>
+            <Button variant="ghost" size="sm" onClick={goToNextMonth}>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
           </div>
         </motion.div>
 
         <div className="space-y-6">
-          {/* Month Comparison Card */}
-          {comparison && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <Card variant={comparison.direction === 'up' ? 'warning' : comparison.direction === 'down' ? 'success' : 'default'}>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-1">
-                        Comparado ao mês anterior
-                      </p>
-                      <div className="flex items-center gap-3">
-                        <span className="text-3xl font-bold">
-                          {comparison.change > 0 ? '+' : ''}{comparison.change.toFixed(1)}%
-                        </span>
-                        {comparison.direction === 'up' && <TrendingUp className="w-6 h-6 text-danger" />}
-                        {comparison.direction === 'down' && <TrendingDown className="w-6 h-6 text-success" />}
-                        {comparison.direction === 'neutral' && <Minus className="w-6 h-6 text-muted-foreground" />}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-muted-foreground">Este mês</p>
-                      <p className="text-xl font-bold">{formatCurrency(comparison.current)}</p>
-                      <p className="text-xs text-muted-foreground">
-                        vs {formatCurrency(comparison.previous)}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
+          {/* Month Summary */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-4 text-center">
+                <TrendingUp className="w-8 h-8 mx-auto mb-2 text-green-500" />
+                <p className="text-sm text-muted-foreground">Renda Total</p>
+                <p className="text-xl font-bold">{formatCurrency(totalIncome)}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <TrendingDown className="w-8 h-8 mx-auto mb-2 text-red-500" />
+                <p className="text-sm text-muted-foreground">Total Gasto</p>
+                <p className="text-xl font-bold">{formatCurrency(totalSpent)}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="w-8 h-8 mx-auto mb-2 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-blue-600 font-bold">%</span>
+                </div>
+                <p className="text-sm text-muted-foreground">% da Renda</p>
+                <p className="text-xl font-bold">{totalIncome > 0 ? ((totalSpent / totalIncome) * 100).toFixed(1) : 0}%</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <div className="w-8 h-8 mx-auto mb-2 bg-green-100 rounded-full flex items-center justify-center">
+                  <span className="text-green-600 font-bold">💰</span>
+                </div>
+                <p className="text-sm text-muted-foreground">Disponível</p>
+                <p className="text-xl font-bold">{formatCurrency(totalIncome - totalSpent)}</p>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Evolution Chart */}
           <motion.div

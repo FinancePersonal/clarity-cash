@@ -123,7 +123,7 @@ const Reports = () => {
                   <span className="text-green-600 font-bold">💰</span>
                 </div>
                 <p className="text-sm text-muted-foreground">Disponível</p>
-                <p className="text-xl font-bold">{formatCurrency(finance.essentialRemaining + finance.personalRemaining)}</p>
+                <p className="text-xl font-bold">{formatCurrency(finance.totalMonthlyIncome - finance.totalSpent)}</p>
               </CardContent>
             </Card>
           </div>

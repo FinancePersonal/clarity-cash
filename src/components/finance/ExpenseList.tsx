@@ -2,8 +2,10 @@ import { motion } from 'framer-motion';
 import { Expense, categoryLabels, categoryIcons } from '@/types/finance';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Trash2, CreditCard, Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 interface ExpenseListProps {
   expenses: Expense[];
@@ -11,6 +13,7 @@ interface ExpenseListProps {
 }
 
 export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
+  const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -72,7 +75,7 @@ export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
                   {expense.description || categoryLabels[expense.category]}
                 </p>
                 {expense.installments && (
-                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
+                  <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full font-medium">
                     {expense.installments.current}/{expense.installments.total}x
                   </span>
                 )}
@@ -84,6 +87,11 @@ export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
               </div>
               <p className="text-xs text-muted-foreground">
                 {formatDate(expense.date)} • {categoryLabels[expense.category]}
+                {expense.installments && (
+                  <span className="ml-2 text-blue-600 dark:text-blue-400">
+                    • Total: {formatCurrency(expense.installments.originalAmount)}
+                  </span>
+                )}
               </p>
             </div>
             <p className={cn(
@@ -96,13 +104,32 @@ export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
               variant="ghost"
               size="icon"
               className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-              onClick={() => onDelete(expense.id)}
+              onClick={() => setExpenseToDelete(expense)}
             >
               <Trash2 className="w-4 h-4 text-muted-foreground hover:text-danger" />
             </Button>
           </motion.div>
         ))}
       </CardContent>
+      
+      <ConfirmDialog
+        isOpen={!!expenseToDelete}
+        onClose={() => setExpenseToDelete(null)}
+        onConfirm={() => {
+          if (expenseToDelete) {
+            onDelete(expenseToDelete.id);
+            setExpenseToDelete(null);
+          }
+        }}
+        title={expenseToDelete?.installments ? 'Remover Parcelas' : 'Remover Gasto'}
+        description={
+          expenseToDelete?.installments 
+            ? `Tem certeza que deseja remover todas as ${expenseToDelete.installments.total} parcelas desta compra? Esta ação não pode ser desfeita.`
+            : 'Tem certeza que deseja remover este gasto? Esta ação não pode ser desfeita.'
+        }
+        confirmText="Remover"
+        variant="danger"
+      />
     </Card>
   );
 }

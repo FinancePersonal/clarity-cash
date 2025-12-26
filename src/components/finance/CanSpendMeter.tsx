@@ -67,41 +67,43 @@ export function CanSpendMeter({ totalRemaining, totalBudget, health, daysLeft = 
   return (
     <Card variant="primary" className={cn("relative overflow-hidden", config.glow)}>
       <CardContent className="p-8">
-        <div className="text-center space-y-4">
-          <motion.div 
-            className="text-5xl"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 10, delay: 0.2 }}
-          >
-            {config.emoji}
-          </motion.div>
-          
-          <div className="space-y-1">
-            <p className="text-primary-foreground/80 text-sm font-medium">
-              {canSpend ? 'Você ainda pode gastar' : 'Você ultrapassou'}
-            </p>
-            <motion.p 
-              className="text-4xl md:text-5xl font-bold text-primary-foreground"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
+        <div className="flex items-center justify-between">
+          <div className="space-y-4">
+            <motion.div 
+              className="text-5xl"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 10, delay: 0.2 }}
             >
-              {formatCurrency(Math.abs(totalRemaining))}
-            </motion.p>
-            <p className="text-primary-foreground/70 text-sm">
-              {getInsight()}
-            </p>
-            {canSpend && daysLeft > 0 && (
-              <div className="flex justify-center gap-4 pt-2 text-xs text-primary-foreground/60">
-                <span>📅 {daysLeft} dias restantes</span>
-                {dailyBudget > 0 && <span>💰 R$ {dailyBudget.toFixed(0)}/dia</span>}
-              </div>
-            )}
+              {config.emoji}
+            </motion.div>
+            
+            <div className="space-y-1">
+              <p className="text-primary-foreground/80 text-sm font-medium">
+                {canSpend ? 'Você ainda pode gastar' : 'Você ultrapassou'}
+              </p>
+              <motion.p 
+                className="text-4xl md:text-5xl font-bold text-primary-foreground"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                {formatCurrency(Math.abs(totalRemaining))}
+              </motion.p>
+              <p className="text-primary-foreground/70 text-sm">
+                {getInsight()}
+              </p>
+              {canSpend && daysLeft > 0 && (
+                <div className="flex gap-4 pt-2 text-xs text-primary-foreground/60">
+                  <span>📅 {daysLeft} dias restantes</span>
+                  {dailyBudget > 0 && <span>💰 R$ {dailyBudget.toFixed(0)}/dia</span>}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Circular progress indicator */}
-          <div className="flex justify-center pt-4">
+          <div className="flex flex-col items-center">
             <div className="relative w-32 h-32">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
                 <circle
@@ -134,10 +136,10 @@ export function CanSpendMeter({ totalRemaining, totalBudget, health, daysLeft = 
                 </span>
               </div>
             </div>
+            <p className="text-primary-foreground/60 text-xs mt-2">
+              do orçamento disponível
+            </p>
           </div>
-          <p className="text-primary-foreground/60 text-xs">
-            do orçamento disponível
-          </p>
         </div>
       </CardContent>
     </Card>

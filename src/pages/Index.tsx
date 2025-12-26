@@ -22,7 +22,8 @@ const Index = () => {
     return <Onboarding onComplete={finance.completeOnboarding} />;
   }
 
-  const availableToSpend = finance.essentialRemaining + finance.personalRemaining;
+  const availableToSpend = finance.totalMonthlyIncome - finance.totalSpent;
+  const totalAvailableBudget = finance.totalMonthlyIncome;
   
   const getDaysLeftInMonth = () => {
     const today = new Date();
@@ -56,7 +57,7 @@ const Index = () => {
           {/* Main Meter */}
           <CanSpendMeter
             totalRemaining={availableToSpend}
-            totalBudget={finance.essentialBudget + finance.personalBudget}
+            totalBudget={totalAvailableBudget}
             health={finance.overallHealth}
             daysLeft={daysLeft}
           />
@@ -81,7 +82,7 @@ const Index = () => {
             <SummaryCard
               title="Investido"
               value={finance.investmentSpent}
-              subtitle={`Meta: ${finance.budgetRule.investments}%`}
+              subtitle={`Sugerido: R$ ${finance.investmentBudget.toFixed(2)} (${finance.budgetRule.investments}%)`}
               icon={TrendingUp}
               variant="success"
               delay={0.2}
@@ -89,6 +90,7 @@ const Index = () => {
             <SummaryCard
               title="Disponível"
               value={availableToSpend}
+              subtitle={`Sobrou da renda total`}
               icon={PiggyBank}
               variant={availableToSpend < 0 ? 'danger' : 'default'}
               delay={0.3}
@@ -133,7 +135,7 @@ const Index = () => {
                 <BudgetMeter
                   spent={finance.investmentSpent}
                   budget={finance.investmentBudget}
-                  label={`Investimentos (${finance.budgetRule.investments}%)`}
+                  label={`Investimentos - Sugerido: R$ ${finance.investmentBudget.toFixed(2)} (${finance.budgetRule.investments}%)`}
                   size="lg"
                 />
               </CardContent>

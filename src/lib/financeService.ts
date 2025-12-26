@@ -58,7 +58,11 @@ class FinanceService {
         })),
         recurringTransactions: userData.recurringTransactions,
         creditCards: userData.creditCards,
-        goals: userData.goals || [],
+        goals: (userData.goals || []).map((g: any) => ({
+          ...g,
+          deadline: new Date(g.deadline),
+          createdAt: new Date(g.createdAt),
+        })),
         alerts: userData.alerts || [],
         plannedPurchases: userData.plannedPurchases || [],
         isOnboarded: userData.isOnboarded,
