@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const users = new Map();
 
@@ -14,8 +14,8 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
   switch (req.method) {
     case 'GET':
-      const data = users.get(userId);
-      return data ? res.json(data) : res.status(404).json({ error: 'Not found' });
+      { const data = users.get(userId);
+      return data ? res.json(data) : res.status(404).json({ error: 'Not found' }); }
 
     case 'PUT':
       users.set(userId, { ...req.body, updatedAt: new Date().toISOString() });
