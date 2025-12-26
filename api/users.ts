@@ -29,12 +29,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     switch (req.method) {
       case 'GET':
         const user = await collection.findOne({ userId });
-        return user ? res.json(user.data) : res.status(404).json({ error: 'Not found' });
+        if (!user) {
+          return res.status(404).json({ error: 'Not found' });
+        }
+        // Retornar os dados sem o _id e userId
+        const { _id, userId: uid, ...userData } = user;
+        return res.json(userData);
 
       case 'PUT':
         await collection.updateOne(
           { userId },
-          { $set: { data: req.body, updatedAt: new Date() } },
+          { $set: { ...req.body, userId, updatedAt: new Date() } },
           { upsert: true }
         );
         return res.json({ success: true });
