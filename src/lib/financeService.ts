@@ -2,7 +2,7 @@ import { FinanceState } from '@/types/finance';
 import { authService } from './authService';
 
 class FinanceService {
-  private apiUrl = import.meta.env.VITE_API_URL || 'https://api.clarity-cash.com';
+  private apiUrl = import.meta.env.VITE_API_URL || '/api';
 
   async saveUserData(userId: string, data: FinanceState): Promise<void> {
     try {
