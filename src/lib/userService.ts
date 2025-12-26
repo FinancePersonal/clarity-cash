@@ -4,7 +4,7 @@ class UserService {
   getUserId(): string {
     const user = authService.getUser();
     if (user) {
-      return user.id;
+      return user.id; // Usar o _id retornado pelo login
     }
     
     // Fallback para usuário não autenticado (modo offline)
