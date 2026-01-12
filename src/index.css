@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,136 +6,131 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 220 25% 10%;
+    /* Premium Fintech Color Palette - Light Mode */
+    --background: 220 20% 97%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 10%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 10%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 224 76% 48%;
+    /* Deep Petrol Blue - Primary (Trust & Stability) */
+    --primary: 200 80% 30%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 20% 96%;
-    --secondary-foreground: 220 25% 20%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 210 15% 93%;
-    --muted-foreground: 220 10% 50%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 224 60% 94%;
-    --accent-foreground: 224 76% 25%;
+    --accent: 200 40% 96%;
+    --accent-foreground: 200 80% 25%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 210 15% 90%;
-    --input: 210 15% 90%;
-    --ring: 224 76% 48%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 200 80% 30%;
 
-    --radius: 0.75rem;
+    --radius: 0.875rem;
 
-    /* Custom finance colors */
-    --success: 152 69% 40%;
+    /* Finance Status Colors */
+    --success: 160 84% 39%;
     --success-foreground: 0 0% 100%;
-    --success-muted: 152 60% 94%;
+    --success-muted: 160 60% 96%;
     
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
-    --warning-muted: 38 90% 94%;
+    --warning-muted: 38 80% 96%;
     
     --danger: 0 72% 51%;
     --danger-foreground: 0 0% 100%;
-    --danger-muted: 0 70% 95%;
+    --danger-muted: 0 60% 97%;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(224 76% 48%) 0%, hsl(230 70% 55%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(210 20% 98%) 100%);
-    --gradient-success: linear-gradient(135deg, hsl(152 69% 40%) 0%, hsl(160 60% 50%) 100%);
-    --gradient-warning: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(45 90% 55%) 100%);
-    --gradient-danger: linear-gradient(135deg, hsl(0 72% 51%) 0%, hsl(10 70% 55%) 100%);
-    --gradient-dark: linear-gradient(145deg, hsl(220 25% 8%) 0%, hsl(220 20% 12%) 100%);
+    /* Premium Shadows */
+    --shadow-xs: 0 1px 2px 0 hsl(220 15% 10% / 0.03);
+    --shadow-sm: 0 1px 3px 0 hsl(220 15% 10% / 0.04), 0 1px 2px -1px hsl(220 15% 10% / 0.03);
+    --shadow-md: 0 4px 6px -1px hsl(220 15% 10% / 0.05), 0 2px 4px -2px hsl(220 15% 10% / 0.03);
+    --shadow-lg: 0 10px 15px -3px hsl(220 15% 10% / 0.06), 0 4px 6px -4px hsl(220 15% 10% / 0.04);
+    --shadow-xl: 0 20px 25px -5px hsl(220 15% 10% / 0.08), 0 8px 10px -6px hsl(220 15% 10% / 0.04);
+    --shadow-glow: 0 0 40px hsl(200 80% 30% / 0.12);
+    --shadow-glow-success: 0 0 40px hsl(160 84% 39% / 0.15);
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(220 25% 10% / 0.03);
-    --shadow-md: 0 4px 6px -1px hsl(220 25% 10% / 0.05), 0 2px 4px -2px hsl(220 25% 10% / 0.03);
-    --shadow-lg: 0 10px 15px -3px hsl(220 25% 10% / 0.05), 0 4px 6px -4px hsl(220 25% 10% / 0.03);
-    --shadow-glow: 0 0 30px hsl(224 76% 48% / 0.15);
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 224 76% 48%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 200 80% 30%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 200 40% 96%;
+    --sidebar-accent-foreground: 200 80% 25%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 224 76% 48%;
+    --sidebar-ring: 200 80% 30%;
   }
 
   .dark {
-    --background: 220 25% 6%;
-    --foreground: 210 20% 96%;
+    /* Premium Dark Mode */
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
 
-    --card: 220 20% 10%;
-    --card-foreground: 210 20% 96%;
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 220 20% 10%;
-    --popover-foreground: 210 20% 96%;
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 224 70% 50%;
-    --primary-foreground: 0 0% 100%;
+    /* Deep Petrol Blue - Primary */
+    --primary: 200 70% 50%;
+    --primary-foreground: 222 47% 6%;
 
-    --secondary: 220 15% 15%;
-    --secondary-foreground: 210 20% 90%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 220 15% 18%;
-    --muted-foreground: 210 15% 55%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 224 40% 15%;
-    --accent-foreground: 224 70% 55%;
+    --accent: 200 40% 15%;
+    --accent-foreground: 200 70% 60%;
 
-    --destructive: 0 62% 45%;
+    --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 18%;
-    --input: 220 15% 18%;
-    --ring: 224 70% 50%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 200 70% 50%;
 
-    /* Custom finance colors - dark */
-    --success: 152 60% 45%;
-    --success-foreground: 220 25% 6%;
-    --success-muted: 152 40% 15%;
+    /* Finance Status Colors - Dark */
+    --success: 160 70% 45%;
+    --success-foreground: 222 47% 6%;
+    --success-muted: 160 40% 12%;
     
-    --warning: 38 85% 50%;
-    --warning-foreground: 220 25% 6%;
-    --warning-muted: 38 50% 15%;
+    --warning: 38 85% 55%;
+    --warning-foreground: 222 47% 6%;
+    --warning-muted: 38 50% 12%;
     
-    --danger: 0 65% 50%;
+    --danger: 0 65% 55%;
     --danger-foreground: 0 0% 100%;
-    --danger-muted: 0 50% 15%;
+    --danger-muted: 0 50% 12%;
 
-    /* Gradients - dark */
-    --gradient-primary: linear-gradient(135deg, hsl(224 70% 50%) 0%, hsl(230 65% 55%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(220 20% 12%) 0%, hsl(220 20% 8%) 100%);
-    --gradient-success: linear-gradient(135deg, hsl(152 60% 45%) 0%, hsl(160 55% 50%) 100%);
-    --gradient-warning: linear-gradient(135deg, hsl(38 85% 50%) 0%, hsl(45 80% 55%) 100%);
-    --gradient-danger: linear-gradient(135deg, hsl(0 65% 50%) 0%, hsl(10 60% 55%) 100%);
-
-    /* Shadows - dark */
-    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.2);
+    /* Premium Shadows - Dark */
+    --shadow-xs: 0 1px 2px 0 hsl(0 0% 0% / 0.2);
+    --shadow-sm: 0 1px 3px 0 hsl(0 0% 0% / 0.25), 0 1px 2px -1px hsl(0 0% 0% / 0.15);
     --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.2);
-    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.3), 0 4px 6px -4px hsl(0 0% 0% / 0.2);
-    --shadow-glow: 0 0 40px hsl(224 70% 50% / 0.2);
+    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.35), 0 4px 6px -4px hsl(0 0% 0% / 0.2);
+    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.4), 0 8px 10px -6px hsl(0 0% 0% / 0.25);
+    --shadow-glow: 0 0 50px hsl(200 70% 50% / 0.15);
+    --shadow-glow-success: 0 0 50px hsl(160 70% 45% / 0.2);
 
-    --sidebar-background: 220 20% 8%;
-    --sidebar-foreground: 210 20% 90%;
-    --sidebar-primary: 224 70% 50%;
-    --sidebar-primary-foreground: 220 25% 6%;
-    --sidebar-accent: 220 15% 15%;
-    --sidebar-accent-foreground: 210 20% 90%;
-    --sidebar-border: 220 15% 18%;
-    --sidebar-ring: 224 70% 50%;
+    --sidebar-background: 222 47% 8%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 200 70% 50%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 200 40% 15%;
+    --sidebar-accent-foreground: 200 70% 60%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 200 70% 50%;
   }
 }
 
@@ -145,48 +140,139 @@
   }
 
   html {
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 }
 
 @layer utilities {
+  /* Premium Glass Effect */
   .glass {
-    @apply bg-card/80 backdrop-blur-xl;
-  }
-  
-  .gradient-primary {
-    background: var(--gradient-primary);
-  }
-  
-  .gradient-card {
-    background: var(--gradient-card);
-  }
-  
-  .gradient-success {
-    background: var(--gradient-success);
-  }
-  
-  .gradient-warning {
-    background: var(--gradient-warning);
-  }
-  
-  .gradient-danger {
-    background: var(--gradient-danger);
+    @apply bg-card/80 backdrop-blur-xl border-border/50;
   }
 
+  .glass-strong {
+    @apply bg-card/90 backdrop-blur-2xl border-border/60;
+  }
+  
+  /* Premium Gradients */
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(200 70% 40%) 100%);
+  }
+
+  .gradient-success {
+    background: linear-gradient(135deg, hsl(var(--success)) 0%, hsl(160 70% 45%) 100%);
+  }
+
+  .gradient-warning {
+    background: linear-gradient(135deg, hsl(var(--warning)) 0%, hsl(30 85% 55%) 100%);
+  }
+
+  .gradient-danger {
+    background: linear-gradient(135deg, hsl(var(--danger)) 0%, hsl(10 70% 55%) 100%);
+  }
+
+  .gradient-subtle {
+    background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--background)) 100%);
+  }
+
+  .gradient-hero {
+    background: linear-gradient(135deg, hsl(200 80% 30%) 0%, hsl(180 70% 35%) 50%, hsl(160 84% 39%) 100%);
+  }
+
+  /* Premium Shadows */
   .shadow-finance {
     box-shadow: var(--shadow-md);
+  }
+
+  .shadow-finance-lg {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .shadow-finance-xl {
+    box-shadow: var(--shadow-xl);
   }
 
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
 
+  .shadow-glow-success {
+    box-shadow: var(--shadow-glow-success);
+  }
+
+  /* Card Hover Effect */
+  .card-hover {
+    @apply transition-all duration-300;
+  }
+
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Data Display */
+  .value-display {
+    @apply font-bold tracking-tight;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .currency {
+    @apply text-sm font-medium text-muted-foreground;
+  }
+
+  /* Status Indicators */
+  .status-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+
+  .status-positive {
+    @apply bg-success;
+  }
+
+  .status-negative {
+    @apply bg-danger;
+  }
+
+  .status-warning {
+    @apply bg-warning;
+  }
+
+  .status-neutral {
+    @apply bg-muted-foreground;
+  }
+
+  /* Text utilities */
   .text-balance {
     text-wrap: balance;
   }
+
+  .text-mono {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
 }
