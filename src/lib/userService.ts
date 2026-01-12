@@ -1,13 +1,6 @@
-import { authService } from './authService';
-
 class UserService {
+  // Generate a simple user ID for offline mode
   getUserId(): string {
-    const user = authService.getUser();
-    if (user) {
-      return user.id; // Usar o _id retornado pelo login
-    }
-    
-    // Fallback para usuário não autenticado (modo offline)
     let userId = localStorage.getItem('clarity-cash-user-id');
     if (!userId) {
       userId = this.generateUserId();
@@ -20,12 +13,13 @@ class UserService {
     return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
   }
 
+  // Always return false since we removed authentication
   isAuthenticated(): boolean {
-    return authService.isAuthenticated();
+    return false;
   }
 
   logout(): void {
-    authService.logout();
+    localStorage.removeItem('clarity-cash-user-id');
   }
 }
 

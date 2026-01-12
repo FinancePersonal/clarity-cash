@@ -1,57 +1,45 @@
+// Configuration for Java API integration
+const API_CONFIG = {
+  baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
+  endpoints: {
+    // Authentication endpoints (to be implemented)
+    auth: {
+      login: '/auth/login',
+      register: '/auth/register',
+      logout: '/auth/logout'
+    },
+    // User data endpoints (to be implemented)
+    user: {
+      profile: '/user/profile',
+      financeData: '/user/finance-data'
+    },
+    // Finance endpoints (to be implemented)
+    finance: {
+      expenses: '/finance/expenses',
+      incomes: '/finance/incomes',
+      creditCards: '/finance/credit-cards',
+      goals: '/finance/goals'
+    }
+  }
+};
+
 interface User {
   id: string;
   email: string;
   name: string;
 }
 
-interface AuthResponse {
-  token: string;
-  user: User;
-}
-
 class AuthService {
-  private apiUrl = '/api';
   private tokenKey = 'clarity-cash-token';
   private userKey = 'clarity-cash-user';
 
-  async register(email: string, password: string, name: string): Promise<AuthResponse> {
-    const response = await fetch(`${this.apiUrl}/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password, name }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Registration failed');
-    }
-
-    const data = await response.json();
-    this.setToken(data.token);
-    this.setUser(data.user);
-    return data;
+  // Placeholder methods - to be implemented with Java API
+  async register(email: string, password: string, name: string): Promise<any> {
+    throw new Error('Authentication will be implemented with Java API');
   }
 
-  async login(email: string, password: string): Promise<AuthResponse> {
-    const response = await fetch(`${this.apiUrl}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Login failed');
-    }
-
-    const data = await response.json();
-    this.setToken(data.token);
-    this.setUser(data.user);
-    return data;
+  async login(email: string, password: string): Promise<any> {
+    throw new Error('Authentication will be implemented with Java API');
   }
 
   logout(): void {
@@ -87,3 +75,4 @@ class AuthService {
 }
 
 export const authService = new AuthService();
+export { API_CONFIG };

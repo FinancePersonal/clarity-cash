@@ -1,98 +1,33 @@
 import { FinanceState } from '@/types/finance';
-import { authService } from './authService';
+import { API_CONFIG } from './authService';
 
 class FinanceService {
-  private apiUrl = '/api';
-
+  // Placeholder methods - to be implemented with Java API
   async saveUserData(userId: string, data: FinanceState): Promise<void> {
-    try {
-      const response = await fetch(`${this.apiUrl}/users?userId=${userId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authService.getAuthHeaders(),
-        },
-        body: JSON.stringify({
-          ...data,
-          updatedAt: new Date().toISOString(),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save data');
-      }
-    } catch (error) {
-      console.error('Error saving user data:', error);
-      throw error;
-    }
+    // TODO: Implement with Java API
+    console.log('Save data will be implemented with Java API:', { userId, data });
   }
 
   async getUserData(userId: string): Promise<FinanceState | null> {
-    try {
-      const response = await fetch(`${this.apiUrl}/users?userId=${userId}`, {
-        headers: {
-          ...authService.getAuthHeaders(),
-        },
-      });
-      
-      if (response.status === 404) {
-        return null;
-      }
-      
-      if (!response.ok) {
-        throw new Error('Failed to load data');
-      }
-
-      const userData = await response.json();
-      
-      return {
-        income: userData.income,
-        budgetRule: userData.budgetRule,
-        expenses: userData.expenses.map((e: any) => ({
-          ...e,
-          date: new Date(e.date),
-        })),
-        incomes: userData.incomes.map((i: any) => ({
-          ...i,
-          date: new Date(i.date),
-        })),
-        recurringTransactions: userData.recurringTransactions,
-        creditCards: userData.creditCards,
-        goals: (userData.goals || []).map((g: any) => ({
-          ...g,
-          deadline: new Date(g.deadline),
-          createdAt: new Date(g.createdAt),
-        })),
-        alerts: userData.alerts || [],
-        plannedPurchases: userData.plannedPurchases || [],
-        isOnboarded: userData.isOnboarded,
-        selectedMonth: new Date(),
-      };
-    } catch (error) {
-      console.error('Error loading user data:', error);
-      return null;
-    }
+    // TODO: Implement with Java API
+    console.log('Get user data will be implemented with Java API:', userId);
+    return null;
   }
 
   async syncData(userId: string, localData: FinanceState): Promise<FinanceState> {
-    try {
-      const cloudData = await this.getUserData(userId);
-      
-      if (!cloudData) {
-        await this.saveUserData(userId, localData);
-        return localData;
-      }
+    // TODO: Implement with Java API
+    console.log('Sync data will be implemented with Java API:', { userId, localData });
+    return localData;
+  }
 
-      const mergedData: FinanceState = {
-        ...cloudData,
-        selectedMonth: localData.selectedMonth,
-      };
+  // Helper method to get API endpoints
+  getEndpoints() {
+    return API_CONFIG.endpoints;
+  }
 
-      return mergedData;
-    } catch (error) {
-      console.error('Error syncing data:', error);
-      return localData;
-    }
+  // Helper method to get base URL
+  getBaseUrl() {
+    return API_CONFIG.baseUrl;
   }
 }
 

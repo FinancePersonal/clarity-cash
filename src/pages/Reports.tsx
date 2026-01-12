@@ -1,8 +1,7 @@
 import { useFinance } from '@/hooks/useFinance';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Download, TrendingUp, TrendingDown } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Download, TrendingUp, TrendingDown } from 'lucide-react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { categoryLabels, categoryIcons } from '@/types/finance';
 
@@ -73,126 +72,114 @@ const Reports = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container max-w-6xl mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <Link to="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Voltar
-              </Button>
-            </Link>
-            <h1 className="text-2xl font-bold">Relatórios</h1>
-          </div>
-          <Button onClick={exportData} variant="outline">
-            <Download className="w-4 h-4 mr-2" />
-            Exportar
-          </Button>
-        </div>
-
-        <div className="grid gap-6">
-          {/* Resumo */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="p-4 text-center">
-                <TrendingUp className="w-8 h-8 mx-auto mb-2 text-green-500" />
-                <p className="text-sm text-muted-foreground">Renda Total</p>
-                <p className="text-xl font-bold">{formatCurrency(finance.totalMonthlyIncome)}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <TrendingDown className="w-8 h-8 mx-auto mb-2 text-red-500" />
-                <p className="text-sm text-muted-foreground">Total Gasto</p>
-                <p className="text-xl font-bold">{formatCurrency(finance.totalSpent)}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="w-8 h-8 mx-auto mb-2 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 font-bold">%</span>
-                </div>
-                <p className="text-sm text-muted-foreground">% da Renda</p>
-                <p className="text-xl font-bold">{((finance.totalSpent / finance.totalMonthlyIncome) * 100).toFixed(1)}%</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <div className="w-8 h-8 mx-auto mb-2 bg-green-100 rounded-full flex items-center justify-center">
-                  <span className="text-green-600 font-bold">💰</span>
-                </div>
-                <p className="text-sm text-muted-foreground">Disponível</p>
-                <p className="text-xl font-bold">{formatCurrency(finance.totalMonthlyIncome - finance.totalSpent)}</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Gráficos */}
-          <div className="grid lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gastos por Categoria</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={categoryData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, value }) => `${name}: ${formatCurrency(value)}`}
-                    >
-                      {categoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Por Tipo de Gasto</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={typeData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis tickFormatter={(value) => `R$ ${value}`} />
-                    <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                    <Bar dataKey="value" fill="#8884d8" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Tendência Mensal */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Tendência dos Últimos 6 Meses</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={monthlyTrend}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis tickFormatter={(value) => `R$ ${value}`} />
-                  <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                  <Line type="monotone" dataKey="gastos" stroke="#8884d8" strokeWidth={2} />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Relatórios</h1>
+        <Button onClick={exportData} variant="outline">
+          <Download className="w-4 h-4 mr-2" />
+          Exportar
+        </Button>
       </div>
+
+      {/* Resumo */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-6 text-center">
+            <TrendingUp className="w-8 h-8 mx-auto mb-2 text-green-500" />
+            <p className="text-sm text-muted-foreground">Renda Total</p>
+            <p className="text-2xl font-bold">{formatCurrency(finance.totalMonthlyIncome)}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6 text-center">
+            <TrendingDown className="w-8 h-8 mx-auto mb-2 text-red-500" />
+            <p className="text-sm text-muted-foreground">Total Gasto</p>
+            <p className="text-2xl font-bold">{formatCurrency(finance.totalSpent)}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6 text-center">
+            <div className="w-8 h-8 mx-auto mb-2 bg-blue-100 rounded-full flex items-center justify-center">
+              <span className="text-blue-600 font-bold">%</span>
+            </div>
+            <p className="text-sm text-muted-foreground">% da Renda</p>
+            <p className="text-2xl font-bold">{((finance.totalSpent / finance.totalMonthlyIncome) * 100).toFixed(1)}%</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6 text-center">
+            <div className="w-8 h-8 mx-auto mb-2 bg-green-100 rounded-full flex items-center justify-center">
+              <span className="text-green-600 font-bold">💰</span>
+            </div>
+            <p className="text-sm text-muted-foreground">Disponível</p>
+            <p className="text-2xl font-bold">{formatCurrency(finance.totalMonthlyIncome - finance.totalSpent)}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Gráficos */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Gastos por Categoria</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={categoryData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, value }) => `${name}: ${formatCurrency(value)}`}
+                >
+                  {categoryData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Por Tipo de Gasto</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={typeData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis tickFormatter={(value) => `R$ ${value}`} />
+                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                <Bar dataKey="value" fill="#8884d8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Tendência Mensal */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Tendência dos Últimos 6 Meses</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={monthlyTrend}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis tickFormatter={(value) => `R$ ${value}`} />
+              <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+              <Line type="monotone" dataKey="gastos" stroke="#8884d8" strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
     </div>
   );
 };

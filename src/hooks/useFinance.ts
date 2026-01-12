@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { FinanceState, Expense, Income, RecurringTransaction, BudgetRule, CreditCard, Goal, PlannedPurchase } from '@/types/finance';
 import { generateInstallments } from '@/lib/installments';
 import { getCreditCardUsageForMonth } from '@/lib/creditCard';
-import { financeService } from '@/lib/financeService';
 import { userService } from '@/lib/userService';
 
 const STORAGE_KEY = 'fintrack-data';
@@ -24,17 +23,37 @@ const defaultState: FinanceState = {
 export function useFinance() {
   const [state, setState] = useState<FinanceState>(defaultState);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSyncing, setIsSyncing] = useState(false);
   const userId = userService.getUserId();
 
+  // Load data from localStorage on mount
   useEffect(() => {
-    const loadData = async () => {
+    const loadData = () => {
       try {
-        // Sempre carregar do servidor, não do localStorage
-        const syncedData = await financeService.syncData(userId, defaultState);
-        setState(syncedData);
+        const stored = localStorage.getItem(`${STORAGE_KEY}-${userId}`);
+        if (stored) {
+          const parsedData = JSON.parse(stored);
+          // Convert date strings back to Date objects
+          const restoredData: FinanceState = {
+            ...parsedData,
+            selectedMonth: new Date(parsedData.selectedMonth || new Date()),
+            expenses: parsedData.expenses?.map((e: any) => ({
+              ...e,
+              date: new Date(e.date),
+            })) || [],
+            incomes: parsedData.incomes?.map((i: any) => ({
+              ...i,
+              date: new Date(i.date),
+            })) || [],
+            goals: parsedData.goals?.map((g: any) => ({
+              ...g,
+              deadline: new Date(g.deadline),
+              createdAt: new Date(g.createdAt),
+            })) || [],
+          };
+          setState(restoredData);
+        }
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error('Error loading data from localStorage:', error);
         setState(defaultState);
       } finally {
         setIsLoading(false);
@@ -44,15 +63,13 @@ export function useFinance() {
     loadData();
   }, [userId]);
 
-  const saveData = useCallback(async (newState: FinanceState) => {
+  // Save data to localStorage whenever state changes
+  const saveData = useCallback((newState: FinanceState) => {
     if (isLoading) return;
     try {
-      setIsSyncing(true);
-      await financeService.saveUserData(userId, newState);
+      localStorage.setItem(`${STORAGE_KEY}-${userId}`, JSON.stringify(newState));
     } catch (error) {
-      console.error('Error saving to cloud:', error);
-    } finally {
-      setIsSyncing(false);
+      console.error('Error saving to localStorage:', error);
     }
   }, [userId, isLoading]);
 
@@ -198,7 +215,6 @@ export function useFinance() {
       
       if (expenseToRemove?.installments) {
         // Para parcelas, encontrar todas as parcelas relacionadas
-        // Assumindo que parcelas relacionadas têm descrições similares e mesmo valor original
         const { originalAmount, total } = expenseToRemove.installments;
         
         return {
@@ -330,7 +346,7 @@ export function useFinance() {
   return {
     ...state,
     isLoading,
-    isSyncing,
+    isSyncing: false, // No more syncing since we're using localStorage only
     completeOnboarding,
     addExpense,
     removeExpense,

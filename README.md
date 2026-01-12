@@ -10,7 +10,7 @@
 - 💰 **Receitas Extras** durante o mês
 - 📅 **Navegação por Mês** com calendário
 - 🌙 **Modo Escuro/Claro**
-- ☁️ **Sincronização na Nuvem** com MongoDB
+- 💾 **Armazenamento Local** com localStorage
 
 ### 📈 **Relatórios e Analytics**
 - 🥧 **Gráfico de Pizza** - Gastos por categoria
@@ -30,13 +30,6 @@
 ```bash
 # Frontend
 npm run dev
-
-# Backend (em outro terminal)
-cd server
-npm start
-
-# Ou usar o script automático
-./start.sh
 ```
 
 ### **Deploy em Produção**
@@ -45,34 +38,41 @@ npm start
 1. Conecte seu repositório no [Vercel](https://vercel.com)
 2. Configure as variáveis de ambiente:
    ```
-   VITE_API_URL=https://seu-backend.vercel.app
+   VITE_API_URL=https://sua-api-java.com/api
    ```
 3. Deploy automático a cada push
 
-#### **Backend (Railway/Render)**
-1. Faça deploy da pasta `server/` 
-2. Configure a variável:
-   ```
-   MONGODB_URI=sua-string-mongodb
-   ```
-
 ## 🔧 **Configuração**
 
-### **MongoDB**
-1. Crie um cluster no [MongoDB Atlas](https://mongodb.com/atlas)
-2. Configure as variáveis no `.env`:
+### **API Java**
+1. Configure a URL da API Java no `.env`:
    ```
-   MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/clarity-cash
-   VITE_API_URL=http://localhost:3001
+   VITE_API_URL=http://localhost:8080/api
    ```
+2. Consulte `API_INTEGRATION.md` para detalhes dos endpoints
 
-## 📋 **Próximos Passos Sugeridos**
+## 📋 **Estado Atual**
+
+### **✅ Implementado**
+- Interface completa do usuário
+- Gerenciamento de dados local (localStorage)
+- Todas as funcionalidades financeiras
+- PWA funcional
+- Estrutura preparada para API Java
+
+### **⏳ Pendente**
+- API Java backend
+- Sistema de autenticação
+- Sincronização na nuvem
+- Integração com banco de dados
+
+## 📋 **Próximos Passos**
 
 ### **Curto Prazo** ⚡
-- [ ] Autenticação com Google/Apple
+- [ ] Implementar API Java
+- [ ] Reativar sistema de autenticação
+- [ ] Sincronização com banco de dados
 - [ ] Notificações push
-- [ ] Modo offline robusto
-- [ ] Importar/exportar dados
 
 ### **Médio Prazo** 🎯
 - [ ] Integração bancária (Open Banking)
@@ -90,10 +90,10 @@ npm start
 
 ```
 Frontend (React + TypeScript)
-    ↓ HTTP Requests
-Backend (Express.js + Node.js)
-    ↓ MongoDB Driver
-Database (MongoDB Atlas)
+    ↓ HTTP Requests (Preparado)
+Java API (A ser implementado)
+    ↓ JPA/Hibernate
+Database (A ser definido)
 ```
 
 ## 📱 **Como Instalar como App**
