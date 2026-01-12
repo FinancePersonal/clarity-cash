@@ -1,18 +1,25 @@
 import { useFinance } from '@/hooks/useFinance';
 import { Onboarding } from '@/components/finance/Onboarding';
-import { Header } from '@/components/finance/Header';
-import { CanSpendMeter } from '@/components/finance/CanSpendMeter';
-import { SummaryCard } from '@/components/finance/SummaryCard';
-import { BudgetMeter } from '@/components/finance/BudgetMeter';
-import { CreditCardStatus } from '@/components/finance/CreditCardStatus';
-import { QuickExpenseForm } from '@/components/finance/QuickExpenseForm';
+import { DashboardHeader } from '@/components/finance/DashboardHeader';
+import { FinancialOverview } from '@/components/finance/FinancialOverview';
+import { FloatingActionButton } from '@/components/finance/FloatingActionButton';
 import { ExpenseList } from '@/components/finance/ExpenseList';
 import { CategoryBreakdown } from '@/components/finance/CategoryBreakdown';
 import { IncomeForm } from '@/components/finance/IncomeForm';
 import { RecurringTransactions } from '@/components/finance/RecurringTransactions';
 import { Alerts } from '@/components/finance/Alerts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wallet, TrendingDown, TrendingUp, PiggyBank } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Plus, 
+  TrendingUp, 
+  ArrowUpRight, 
+  ArrowDownRight,
+  Activity,
+  Zap,
+  Sparkles
+} from 'lucide-react';
 
 const Index = () => {
   const finance = useFinance();
@@ -25,7 +32,7 @@ const Index = () => {
     );
   }
 
-  const availableToSpend = finance.totalMonthlyIncome - finance.totalSpent;
+  const availableToSpend = finance.totalMonthlyIncome - finance.totalSpent - finance.investmentSpent;
   const totalAvailableBudget = finance.totalMonthlyIncome;
   
   const getDaysLeftInMonth = () => {
@@ -35,73 +42,244 @@ const Index = () => {
   };
 
   const daysLeft = getDaysLeftInMonth();
+  
+  const getBudgetHealth = (): 'excellent' | 'good' | 'warning' | 'danger' => {
+    const spentPercentage = (finance.totalSpent / finance.totalMonthlyIncome) * 100;
+    if (spentPercentage <= 50) return 'excellent';
+    if (spentPercentage <= 75) return 'good';
+    if (spentPercentage <= 90) return 'warning';
+    return 'danger';
+  };
+
+  const getSmartMessage = () => {
+    const spentPercentage = (finance.totalSpent / finance.totalMonthlyIncome) * 100;
+    const totalUsed = finance.totalSpent + finance.investmentSpent;
+    const dailyBudget = (finance.totalMonthlyIncome - totalUsed) / Math.max(daysLeft, 1);
+    
+    if (totalUsed > finance.totalMonthlyIncome) {
+      return {
+        title: 'Orçamento excedido',
+        subtitle: 'Considere revisar seus gastos este mês',
+        action: 'Ver onde economizar'
+      };
+    }
+    if (spentPercentage > 80) {
+      return {
+        title: 'Atenção ao ritmo',
+        subtitle: `Limite diário: R$ ${dailyBudget.toFixed(0)} pelos próximos ${daysLeft} dias`,
+        action: 'Ajustar gastos'
+      };
+    }
+    if (spentPercentage < 40) {
+      return {
+        title: 'Excelente controle!',
+        subtitle: 'Você pode investir mais ou criar uma reserva',
+        action: 'Ver oportunidades'
+      };
+    }
+    return {
+      title: 'Boa gestão financeira',
+      subtitle: `R$ ${dailyBudget.toFixed(0)}/dia disponível pelos próximos ${daysLeft} dias`,
+      action: 'Continuar assim'
+    };
+  };
+
+  const smartMessage = getSmartMessage();
+
+  const exportData = () => {
+    const data = {
+      month: finance.selectedMonth,
+      income: finance.totalMonthlyIncome,
+      expenses: finance.currentMonthExpenses,
+      summary: {
+        totalSpent: finance.totalSpent,
+        availableToSpend,
+        budgetHealth: getBudgetHealth()
+      }
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `clarity-cash-${finance.selectedMonth.getFullYear()}-${finance.selectedMonth.getMonth() + 1}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="space-y-8">
+      {/* Alerts */}
       <Alerts 
         alerts={finance.alerts || []} 
         onDismiss={(id) => {
-          // Mark alert as read
           const updatedAlerts = finance.alerts?.map(alert => 
             alert.id === id ? { ...alert, isRead: true } : alert
           ) || [];
-          // This would need to be implemented in useFinance
         }}
       />
       
-      <Header 
+      {/* Dashboard Header */}
+      <DashboardHeader 
         selectedMonth={finance.selectedMonth}
         onMonthChange={finance.setSelectedMonth}
-        onReset={finance.resetData} 
+        onExportData={exportData}
+        onRefresh={finance.resetData}
       />
 
-      {/* Main Meter */}
-      <div className="mb-8">
-        <CanSpendMeter
-          totalRemaining={availableToSpend}
-          totalBudget={totalAvailableBudget}
-          health={finance.overallHealth}
-          daysLeft={daysLeft}
+      {/* Smart Financial Insight Banner */}
+      <div className="fintech-card p-3 bg-gradient-to-r from-primary/5 via-primary/3 to-primary/5 border-primary/20 mb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <div>
+              <h3 className="text-sm font-medium text-foreground">{smartMessage.title}</h3>
+              <p className="text-xs text-muted-foreground">{smartMessage.subtitle}</p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" className="fintech-button text-xs" onClick={() => window.location.href = '/reports'}>
+            {smartMessage.action}
+          </Button>
+        </div>
+      </div>
+
+      {/* Compact Financial Overview */}
+      <div className="fintech-card p-4 mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Visão Geral</h2>
+            <p className="text-sm text-muted-foreground">{finance.overallHealth === 'excellent' ? 'Excelente controle' : finance.overallHealth === 'good' ? 'Bom controle' : finance.overallHealth === 'warning' ? 'Atenção' : 'Crítico'}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-muted-foreground">Orçamento Utilizado</p>
+            <p className="text-2xl font-bold text-foreground">{((finance.totalSpent / finance.totalMonthlyIncome) * 100).toFixed(0)}%</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Financial Overview */}
+      <div className="mb-6">
+        <FinancialOverview
+          totalIncome={finance.totalMonthlyIncome}
+          totalSpent={finance.totalSpent}
+          availableToSpend={availableToSpend}
+          investmentSpent={finance.investmentSpent}
+          investmentBudget={finance.investmentBudget}
+          creditCardUsed={finance.creditCardUsed}
+          creditCardLimit={finance.creditCardLimit}
+          budgetHealth={getBudgetHealth()}
+          daysLeftInMonth={daysLeft}
         />
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <SummaryCard
-          title="Renda Total"
-          value={finance.totalMonthlyIncome}
-          subtitle={finance.additionalIncome > 0 ? `+R$ ${finance.additionalIncome.toFixed(2)} extra` : undefined}
-          icon={Wallet}
-          delay={0}
-          className="bg-gradient-to-br from-green-50/80 to-emerald-50/80 border-green-200/40 dark:from-green-950/20 dark:to-emerald-950/20 dark:border-green-800/30 shadow-sm hover:shadow-md transition-shadow"
-        />
-        <SummaryCard
-          title="Total Gasto"
-          value={finance.totalSpent}
-          subtitle={`${((finance.totalSpent / finance.totalMonthlyIncome) * 100).toFixed(0)}% da renda`}
-          icon={TrendingDown}
-          variant={finance.totalSpent > finance.totalMonthlyIncome * 0.8 ? 'warning' : 'default'}
-          delay={0.1}
-          className="bg-gradient-to-br from-red-50/80 to-rose-50/80 border-red-200/40 dark:from-red-950/20 dark:to-rose-950/20 dark:border-red-800/30 shadow-sm hover:shadow-md transition-shadow"
-        />
-        <SummaryCard
-          title="Investido"
-          value={finance.investmentSpent}
-          subtitle={`Sugerido: R$ ${finance.investmentBudget.toFixed(2)} (${finance.budgetRule.investments}%)`}
-          icon={TrendingUp}
-          variant="success"
-          delay={0.2}
-          className="bg-gradient-to-br from-blue-50/80 to-indigo-50/80 border-blue-200/40 dark:from-blue-950/20 dark:to-indigo-950/20 dark:border-blue-800/30 shadow-sm hover:shadow-md transition-shadow"
-        />
-        <SummaryCard
-          title="Disponível"
-          value={availableToSpend}
-          subtitle={`Sobrou da renda total`}
-          icon={PiggyBank}
-          variant={availableToSpend < 0 ? 'danger' : 'default'}
-          delay={0.3}
-          className="bg-gradient-to-br from-purple-50/80 to-violet-50/80 border-purple-200/40 dark:from-purple-950/20 dark:to-violet-950/20 dark:border-purple-800/30 shadow-sm hover:shadow-md transition-shadow"
-        />
+      {/* Enhanced Quick Actions with CTA Hierarchy */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        <Card className="fintech-card lg:col-span-2">
+          <CardHeader className="pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-primary" />
+                Ações Rápidas
+              </CardTitle>
+              <Badge variant="secondary" className="bg-primary/10 text-primary animate-pulse">
+                {finance.currentMonthExpenses.length} transações
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Primary CTA - Nova Despesa */}
+            <div className="p-4 rounded-xl bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h4 className="font-semibold text-foreground">Registrar Gasto</h4>
+                  <p className="text-sm text-muted-foreground">Ação mais comum</p>
+                </div>
+                <Button 
+                  onClick={() => document.querySelector('[data-testid="floating-action-button"]')?.click()}
+                  className="gradient-primary text-white hover:scale-105 transition-transform duration-200"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova Despesa
+                </Button>
+              </div>
+            </div>
+            
+            {/* Secondary Actions */}
+            <div className="grid grid-cols-2 gap-4">
+              <Button 
+                onClick={() => document.querySelector('[data-testid="floating-action-button"]')?.click()}
+                variant="outline" 
+                className="fintech-button h-12 hover:scale-105 transition-all duration-200"
+              >
+                <TrendingUp className="h-4 w-4 mr-2" />
+                Nova Receita
+              </Button>
+              <Button 
+                onClick={() => window.location.href = '/reports'}
+                variant="outline" 
+                className="fintech-button h-12 hover:scale-105 transition-all duration-200"
+              >
+                <Activity className="h-4 w-4 mr-2" />
+                Ver Relatórios
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="p-4 rounded-xl bg-success/5 border border-success/20 hover:bg-success/10 transition-colors duration-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <ArrowUpRight className="h-4 w-4 text-success" />
+                  <span className="text-sm font-medium text-success">Receitas</span>
+                </div>
+                <p className="text-lg font-semibold text-foreground">
+                  R$ {finance.totalMonthlyIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </p>
+              </div>
+              
+              <div className="p-4 rounded-xl bg-danger/5 border border-danger/20 hover:bg-danger/10 transition-colors duration-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <ArrowDownRight className="h-4 w-4 text-danger" />
+                  <span className="text-sm font-medium text-danger">Despesas</span>
+                </div>
+                <p className="text-lg font-semibold text-foreground">
+                  R$ {finance.totalSpent.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="fintech-card">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-primary" />
+              Atividade Recente
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {finance.currentMonthExpenses.slice(0, 3).map((expense, index) => (
+                <div key={expense.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors duration-200">
+                  <div>
+                    <p className="font-medium text-sm text-foreground">{expense.description}</p>
+                    <p className="text-xs text-muted-foreground">{expense.category}</p>
+                  </div>
+                  <p className="font-semibold text-sm text-danger">
+                    -R$ {expense.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+              ))}
+              
+              {finance.currentMonthExpenses.length === 0 && (
+                <div className="text-center py-6">
+                  <p className="text-muted-foreground text-sm">Nenhuma transação ainda</p>
+                  <p className="text-xs text-muted-foreground mt-1">Comece registrando uma despesa</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Income & Recurring Transactions */}
@@ -120,44 +298,6 @@ const Index = () => {
         />
       </div>
 
-      {/* Budget Breakdown & Credit Card */}
-      <div className="grid lg:grid-cols-3 gap-8">
-        <Card className="lg:col-span-2 shadow-sm">
-          <CardHeader>
-            <CardTitle>Orçamento do Mês</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <BudgetMeter
-              spent={finance.essentialSpent}
-              budget={finance.essentialBudget}
-              label={`Essenciais (${finance.budgetRule.essentials}%)`}
-              size="lg"
-            />
-            <BudgetMeter
-              spent={finance.personalSpent}
-              budget={finance.personalBudget}
-              label={`Pessoais (${finance.budgetRule.personal}%)`}
-              size="lg"
-            />
-            <BudgetMeter
-              spent={finance.investmentSpent}
-              budget={finance.investmentBudget}
-              label={`Investimentos - Sugerido: R$ ${finance.investmentBudget.toFixed(2)} (${finance.budgetRule.investments}%)`}
-              size="lg"
-            />
-          </CardContent>
-        </Card>
-
-        {finance.creditCards.length > 0 && (
-          <CreditCardStatus
-            limit={finance.creditCardLimit}
-            used={finance.creditCardUsed}
-            dueDay={10}
-            selectedMonth={finance.selectedMonth}
-          />
-        )}
-      </div>
-
       {/* Expenses & Categories */}
       <div className="grid lg:grid-cols-2 gap-8">
         <ExpenseList
@@ -167,11 +307,12 @@ const Index = () => {
         <CategoryBreakdown expenses={finance.currentMonthExpenses} />
       </div>
 
-      {/* Quick Add Button */}
-      <QuickExpenseForm 
-        creditCards={finance.creditCards}
-        selectedMonth={finance.selectedMonth}
-        onSubmit={finance.addExpense} 
+      {/* Enhanced Floating Action Button */}
+      <FloatingActionButton 
+        onAddExpense={finance.addExpense}
+        onAddIncome={finance.addIncome}
+        onAddInvestment={finance.addInvestment}
+        className="shadow-2xl hover:shadow-primary/25"
       />
     </div>
   );

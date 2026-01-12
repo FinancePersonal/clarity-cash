@@ -30,6 +30,16 @@ export interface Expense {
   showInBankStatement?: boolean;
 }
 
+export interface Investment {
+  id: string;
+  amount: number;
+  category: InvestmentCategory;
+  description?: string;
+  date: Date;
+  month: number;
+  year: number;
+}
+
 export interface Income {
   id: string;
   amount: number;
@@ -60,6 +70,13 @@ export type ExpenseCategory =
   | 'subscription'
   | 'investment'
   | 'other';
+
+export type InvestmentCategory = 
+  | 'fixed_income'
+  | 'stocks'
+  | 'real_estate_funds'
+  | 'crypto'
+  | 'other_investments';
 
 export interface MonthlyData {
   month: string;
@@ -117,6 +134,7 @@ export interface FinanceState {
   budgetRule: BudgetRule;
   expenses: Expense[];
   incomes: Income[];
+  investments: Investment[];
   recurringTransactions: RecurringTransaction[];
   creditCards: CreditCard[];
   goals: Goal[];
@@ -139,15 +157,31 @@ export const categoryLabels: Record<ExpenseCategory, string> = {
   other: 'Outros',
 };
 
+export const investmentCategoryLabels: Record<InvestmentCategory, string> = {
+  fixed_income: 'Renda Fixa',
+  stocks: 'Ações',
+  real_estate_funds: 'Fundos Imobiliários (FIIs)',
+  crypto: 'Criptomoedas',
+  other_investments: 'Outros Investimentos',
+};
+
 export const categoryIcons: Record<ExpenseCategory, string> = {
-  housing: '🏠',
-  food: '🍽️',
-  transport: '🚗',
-  health: '💊',
-  education: '📚',
-  entertainment: '🎮',
-  shopping: '🛍️',
-  subscription: '📱',
-  investment: '📈',
-  other: '📋',
+  housing: 'house',
+  food: 'utensils',
+  transport: 'car',
+  health: 'heart-pulse',
+  education: 'book',
+  entertainment: 'gamepad-2',
+  shopping: 'shopping-bag',
+  subscription: 'smartphone',
+  investment: 'trending-up',
+  other: 'more-horizontal',
+};
+
+export const investmentCategoryIcons: Record<InvestmentCategory, string> = {
+  fixed_income: 'building-2',
+  stocks: 'trending-up',
+  real_estate_funds: 'building',
+  crypto: 'coins',
+  other_investments: 'piggy-bank',
 };

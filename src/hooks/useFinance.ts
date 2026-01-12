@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { FinanceState, Expense, Income, RecurringTransaction, BudgetRule, CreditCard, Goal, PlannedPurchase } from '@/types/finance';
+import { FinanceState, Expense, Income, Investment, RecurringTransaction, BudgetRule, CreditCard, Goal, PlannedPurchase } from '@/types/finance';
 import { generateInstallments } from '@/lib/installments';
 import { getCreditCardUsageForMonth } from '@/lib/creditCard';
 import { userService } from '@/lib/userService';
@@ -11,6 +11,7 @@ const defaultState: FinanceState = {
   budgetRule: { essentials: 50, personal: 30, investments: 20 },
   expenses: [],
   incomes: [],
+  investments: [],
   recurringTransactions: [],
   creditCards: [],
   goals: [],
@@ -43,6 +44,10 @@ export function useFinance() {
             incomes: parsedData.incomes?.map((i: any) => ({
               ...i,
               date: new Date(i.date),
+            })) || [],
+            investments: parsedData.investments?.map((inv: any) => ({
+              ...inv,
+              date: new Date(inv.date),
             })) || [],
             goals: parsedData.goals?.map((g: any) => ({
               ...g,
@@ -98,6 +103,28 @@ export function useFinance() {
       expenses: [...prev.expenses, newExpense],
     }));
   }, [state.selectedMonth]);
+
+  const addInvestment = useCallback((investment: Omit<Investment, 'id'>) => {
+    const newInvestment: Investment = {
+      ...investment,
+      id: crypto.randomUUID(),
+      date: investment.date || new Date(state.selectedMonth.getFullYear(), state.selectedMonth.getMonth(), 1),
+      month: state.selectedMonth.getMonth(),
+      year: state.selectedMonth.getFullYear()
+    };
+    
+    setState(prev => ({
+      ...prev,
+      investments: [...prev.investments, newInvestment],
+    }));
+  }, [state.selectedMonth]);
+
+  const removeInvestment = useCallback((id: string) => {
+    setState(prev => ({
+      ...prev,
+      investments: prev.investments.filter(i => i.id !== id),
+    }));
+  }, []);
 
   const addIncome = useCallback((income: Omit<Income, 'id'>) => {
     const newIncome: Income = {
@@ -285,6 +312,11 @@ export function useFinance() {
            e.date.getFullYear() === state.selectedMonth.getFullYear();
   });
 
+  const currentMonthInvestments = state.investments.filter(i => {
+    return i.date.getMonth() === state.selectedMonth.getMonth() && 
+           i.date.getFullYear() === state.selectedMonth.getFullYear();
+  });
+
   const currentMonthIncomes = state.incomes.filter(i => {
     return i.date.getMonth() === state.selectedMonth.getMonth() && 
            i.date.getFullYear() === state.selectedMonth.getFullYear();
@@ -301,7 +333,13 @@ export function useFinance() {
     .reduce((sum, t) => sum + t.amount, 0);
 
   const totalMonthlyIncome = state.income + additionalIncome + activeRecurringIncomes;
-  const totalSpent = currentMonthExpenses.reduce((sum, e) => sum + e.amount, 0) + activeRecurringExpenses;
+  
+  // Separate calculations for expenses vs investments
+  const regularExpenses = currentMonthExpenses.filter(e => e.type !== 'investment');
+  const investmentExpenses = currentMonthExpenses.filter(e => e.type === 'investment');
+  
+  // Total spent should NOT include investments (investments are separate from spending)
+  const totalSpent = regularExpenses.reduce((sum, e) => sum + e.amount, 0) + activeRecurringExpenses;
   
   const essentialSpent = currentMonthExpenses
     .filter(e => e.type === 'essential')
@@ -311,9 +349,8 @@ export function useFinance() {
     .filter(e => e.type === 'personal')
     .reduce((sum, e) => sum + e.amount, 0);
   
-  const investmentSpent = currentMonthExpenses
-    .filter(e => e.type === 'investment')
-    .reduce((sum, e) => sum + e.amount, 0);
+  // Investment spent is separate from regular spending
+  const investmentSpent = currentMonthInvestments.reduce((sum, i) => sum + i.amount, 0);
 
   const essentialBudget = (totalMonthlyIncome * state.budgetRule.essentials) / 100;
   const personalBudget = (totalMonthlyIncome * state.budgetRule.personal) / 100;
@@ -334,6 +371,7 @@ export function useFinance() {
 
   const overallHealth = (): 'excellent' | 'good' | 'warning' | 'danger' => {
     const totalBudget = essentialBudget + personalBudget;
+    // Only count essential and personal spending, NOT investments
     const spent = essentialSpent + personalSpent;
     const percent = totalBudget > 0 ? (spent / totalBudget) * 100 : 0;
     
@@ -352,6 +390,8 @@ export function useFinance() {
     removeExpense,
     addIncome,
     removeIncome,
+    addInvestment,
+    removeInvestment,
     addRecurringTransaction,
     toggleRecurringTransaction,
     removeRecurringTransaction,
@@ -370,6 +410,7 @@ export function useFinance() {
     resetData,
     currentMonthExpenses,
     currentMonthIncomes,
+    currentMonthInvestments,
     totalMonthlyIncome,
     additionalIncome,
     totalSpent,
