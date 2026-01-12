@@ -73,7 +73,6 @@ const Index = () => {
           subtitle={finance.additionalIncome > 0 ? `+R$ ${finance.additionalIncome.toFixed(2)} extra` : undefined}
           icon={Wallet}
           delay={0}
-          className="bg-gradient-to-br from-green-50/80 to-emerald-50/80 border-green-200/40 dark:from-green-950/20 dark:to-emerald-950/20 dark:border-green-800/30 shadow-sm hover:shadow-md transition-shadow"
         />
         <SummaryCard
           title="Total Gasto"
@@ -82,7 +81,6 @@ const Index = () => {
           icon={TrendingDown}
           variant={finance.totalSpent > finance.totalMonthlyIncome * 0.8 ? 'warning' : 'default'}
           delay={0.1}
-          className="bg-gradient-to-br from-red-50/80 to-rose-50/80 border-red-200/40 dark:from-red-950/20 dark:to-rose-950/20 dark:border-red-800/30 shadow-sm hover:shadow-md transition-shadow"
         />
         <SummaryCard
           title="Investido"
@@ -91,7 +89,6 @@ const Index = () => {
           icon={TrendingUp}
           variant="success"
           delay={0.2}
-          className="bg-gradient-to-br from-blue-50/80 to-indigo-50/80 border-blue-200/40 dark:from-blue-950/20 dark:to-indigo-950/20 dark:border-blue-800/30 shadow-sm hover:shadow-md transition-shadow"
         />
         <SummaryCard
           title="Disponível"
@@ -100,7 +97,6 @@ const Index = () => {
           icon={PiggyBank}
           variant={availableToSpend < 0 ? 'danger' : 'default'}
           delay={0.3}
-          className="bg-gradient-to-br from-purple-50/80 to-violet-50/80 border-purple-200/40 dark:from-purple-950/20 dark:to-violet-950/20 dark:border-purple-800/30 shadow-sm hover:shadow-md transition-shadow"
         />
       </div>
 

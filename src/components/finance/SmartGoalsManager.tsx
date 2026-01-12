@@ -298,6 +298,11 @@ export function SmartGoalsManager({ goals, onAdd, onUpdate }: SmartGoalsManagerP
     return goalCategories.find(cat => cat.id === categoryId) || goalCategories[0];
   };
 
+  const getProgress = (goal: Goal) => {
+    if (goal.targetAmount === 0) return 0;
+    return (goal.currentAmount / goal.targetAmount) * 100;
+  };
+
   return (
     <div className="space-y-6">
       <Card>
