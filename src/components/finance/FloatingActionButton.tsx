@@ -24,6 +24,7 @@ interface FloatingActionButtonProps {
   onAddExpense: (expense: any) => void;
   onAddIncome?: (income: any) => void;
   onAddInvestment?: (investment: any) => void;
+  creditCards?: Array<{ id: string; name: string; }>;
   className?: string;
 }
 
@@ -64,7 +65,8 @@ const getCategoryType = (category: string): 'essential' | 'personal' => {
 export function FloatingActionButton({ 
   onAddExpense, 
   onAddIncome,
-  onAddInvestment, 
+  onAddInvestment,
+  creditCards = [],
   className 
 }: FloatingActionButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -73,7 +75,10 @@ export function FloatingActionButton({
     description: '',
     amount: '',
     category: '',
-    paymentMethod: ''
+    paymentMethod: '',
+    creditCardId: '',
+    installments: '1',
+    currentInstallment: '1'
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -83,17 +88,67 @@ export function FloatingActionButton({
     if (activeTab === 'expense') {
       const category = formData.category || 'Outros';
       const expenseType = getCategoryType(category);
+      const totalAmount = parseFloat(formData.amount);
       
-      onAddExpense({
+      const expense: any = {
         description: formData.description,
-        amount: parseFloat(formData.amount),
+        amount: totalAmount,
         category: category,
         paymentMethod: formData.paymentMethod || 'cash',
         type: expenseType,
         date: new Date(),
         month: new Date().getMonth(),
         year: new Date().getFullYear()
-      });
+      };
+
+      if (formData.paymentMethod === 'credit' && formData.creditCardId) {
+        expense.creditCardId = formData.creditCardId;
+        
+        const totalInstallments = parseInt(formData.installments) || 1;
+        const currentInstallmentNum = parseInt(formData.currentInstallment) || 1;
+        
+        if (totalInstallments > 1) {
+          const installmentAmount = totalAmount / totalInstallments;
+          const currentDate = new Date();
+          const firstInstallmentDate = new Date(currentDate);
+          firstInstallmentDate.setMonth(firstInstallmentDate.getMonth() - (currentInstallmentNum - 1));
+          
+          // Criar todas as parcelas
+          for (let i = 0; i < totalInstallments; i++) {
+            const installmentDate = new Date(firstInstallmentDate);
+            installmentDate.setMonth(installmentDate.getMonth() + i);
+            
+            onAddExpense({
+              ...expense,
+              amount: installmentAmount,
+              date: installmentDate,
+              month: installmentDate.getMonth(),
+              year: installmentDate.getFullYear(),
+              description: `${formData.description} (${i + 1}/${totalInstallments})`,
+              installments: {
+                current: i + 1,
+                total: totalInstallments,
+                originalAmount: totalAmount
+              }
+            });
+          }
+          
+          // Resetar form e sair
+          setFormData({
+            description: '',
+            amount: '',
+            category: '',
+            paymentMethod: '',
+            creditCardId: '',
+            installments: '1',
+            currentInstallment: '1'
+          });
+          setIsOpen(false);
+          return;
+        }
+      }
+      
+      onAddExpense(expense);
     } else if (activeTab === 'income' && onAddIncome) {
       onAddIncome({
         description: formData.description,
@@ -117,7 +172,10 @@ export function FloatingActionButton({
       description: '',
       amount: '',
       category: '',
-      paymentMethod: ''
+      paymentMethod: '',
+      creditCardId: '',
+      installments: '1',
+      currentInstallment: '1'
     });
     setIsOpen(false);
   };
@@ -260,24 +318,71 @@ export function FloatingActionButton({
                 </div>
                 
                 {activeTab === 'expense' && (
-                  <div>
-                    <Label htmlFor="paymentMethod">Forma de Pagamento</Label>
-                    <Select value={formData.paymentMethod} onValueChange={(value) => setFormData(prev => ({ ...prev, paymentMethod: value }))}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecionar forma" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {paymentMethods.map(method => (
-                          <SelectItem key={method.value} value={method.value}>
-                            <div className="flex items-center gap-2">
-                              <method.icon className="h-4 w-4" />
-                              {method.label}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <>
+                    <div>
+                      <Label htmlFor="paymentMethod">Forma de Pagamento</Label>
+                      <Select value={formData.paymentMethod} onValueChange={(value) => setFormData(prev => ({ ...prev, paymentMethod: value, creditCardId: '', installments: '1', currentInstallment: '1' }))}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecionar forma" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {paymentMethods.map(method => (
+                            <SelectItem key={method.value} value={method.value}>
+                              <div className="flex items-center gap-2">
+                                <method.icon className="h-4 w-4" />
+                                {method.label}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {formData.paymentMethod === 'credit' && (
+                      <>
+                        <div>
+                          <Label htmlFor="creditCard">Cartão de Crédito</Label>
+                          <Select value={formData.creditCardId} onValueChange={(value) => setFormData(prev => ({ ...prev, creditCardId: value }))}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecionar cartão" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {creditCards.map(card => (
+                                <SelectItem key={card.id} value={card.id}>
+                                  {card.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="installments">Total de Parcelas</Label>
+                            <Input
+                              id="installments"
+                              type="number"
+                              min="1"
+                              max="24"
+                              value={formData.installments}
+                              onChange={(e) => setFormData(prev => ({ ...prev, installments: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="currentInstallment">Parcela Atual</Label>
+                            <Input
+                              id="currentInstallment"
+                              type="number"
+                              min="1"
+                              max={formData.installments}
+                              value={formData.currentInstallment}
+                              onChange={(e) => setFormData(prev => ({ ...prev, currentInstallment: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </>
                 )}
               </>
             )}

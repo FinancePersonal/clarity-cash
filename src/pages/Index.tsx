@@ -129,35 +129,35 @@ const Index = () => {
         onRefresh={finance.resetData}
       />
 
-      {/* Smart Financial Insight Banner */}
-      <div className="fintech-card p-3 bg-gradient-to-r from-primary/5 via-primary/3 to-primary/5 border-primary/20 mb-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <div>
-              <h3 className="text-sm font-medium text-foreground">{smartMessage.title}</h3>
-              <p className="text-xs text-muted-foreground">{smartMessage.subtitle}</p>
-            </div>
-          </div>
-          <Button variant="outline" size="sm" className="fintech-button text-xs" onClick={() => window.location.href = '/reports'}>
-            {smartMessage.action}
-          </Button>
-        </div>
-      </div>
+      {/*/!* Smart Financial Insight Banner *!/*/}
+      {/*<div className="fintech-card p-3 bg-gradient-to-r from-primary/5 via-primary/3 to-primary/5 border-primary/20 mb-4">*/}
+      {/*  <div className="flex items-center justify-between">*/}
+      {/*    <div className="flex items-center gap-2">*/}
+      {/*      <Sparkles className="h-4 w-4 text-primary" />*/}
+      {/*      <div>*/}
+      {/*        <h3 className="text-sm font-medium text-foreground">{smartMessage.title}</h3>*/}
+      {/*        <p className="text-xs text-muted-foreground">{smartMessage.subtitle}</p>*/}
+      {/*      </div>*/}
+      {/*    </div>*/}
+      {/*    <Button variant="outline" size="sm" className="fintech-button text-xs" onClick={() => window.location.href = '/reports'}>*/}
+      {/*      {smartMessage.action}*/}
+      {/*    </Button>*/}
+      {/*  </div>*/}
+      {/*</div>*/}
 
-      {/* Compact Financial Overview */}
-      <div className="fintech-card p-4 mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-foreground">Visão Geral</h2>
-            <p className="text-sm text-muted-foreground">{finance.overallHealth === 'excellent' ? 'Excelente controle' : finance.overallHealth === 'good' ? 'Bom controle' : finance.overallHealth === 'warning' ? 'Atenção' : 'Crítico'}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">Orçamento Utilizado</p>
-            <p className="text-2xl font-bold text-foreground">{((finance.totalSpent / finance.totalMonthlyIncome) * 100).toFixed(0)}%</p>
-          </div>
-        </div>
-      </div>
+      {/*/!* Compact Financial Overview *!/*/}
+      {/*<div className="fintech-card p-4 mb-6">*/}
+      {/*  <div className="flex items-center justify-between">*/}
+      {/*    <div>*/}
+      {/*      <h2 className="text-lg font-semibold text-foreground">Visão Geral</h2>*/}
+      {/*      <p className="text-sm text-muted-foreground">{finance.overallHealth === 'excellent' ? 'Excelente controle' : finance.overallHealth === 'good' ? 'Bom controle' : finance.overallHealth === 'warning' ? 'Atenção' : 'Crítico'}</p>*/}
+      {/*    </div>*/}
+      {/*    <div className="text-right">*/}
+      {/*      <p className="text-sm text-muted-foreground">Orçamento Utilizado</p>*/}
+      {/*      <p className="text-2xl font-bold text-foreground">{((finance.totalSpent / finance.totalMonthlyIncome) * 100).toFixed(0)}%</p>*/}
+      {/*    </div>*/}
+      {/*  </div>*/}
+      {/*</div>*/}
 
       {/* Financial Overview */}
       <div className="mb-6">
@@ -217,7 +217,7 @@ const Index = () => {
                 Nova Receita
               </Button>
               <Button 
-                onClick={() => window.location.href = '/reports'}
+                onClick={() => window.location.href = '/app/reports'}
                 variant="outline" 
                 className="fintech-button h-12 hover:scale-105 transition-all duration-200"
               >
@@ -312,6 +312,7 @@ const Index = () => {
         onAddExpense={finance.addExpense}
         onAddIncome={finance.addIncome}
         onAddInvestment={finance.addInvestment}
+        creditCards={finance.creditCards}
         className="shadow-2xl hover:shadow-primary/25"
       />
     </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -15,7 +15,8 @@ import {
   TrendingUp,
   Wallet2,
   Bell,
-  ChevronRight
+  ChevronRight,
+  LogOut
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -23,18 +24,25 @@ interface LayoutProps {
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard, description: 'Visão geral' },
-  { name: 'Investimentos', href: '/investments', icon: TrendingUp, description: 'Patrimônio' },
-  { name: 'Relatórios', href: '/reports', icon: BarChart3, description: 'Análises' },
-  { name: 'Planejamento', href: '/planning', icon: Target, description: 'Metas' },
-  { name: 'Histórico', href: '/history', icon: Clock, description: 'Transações' },
-  { name: 'Configurações', href: '/settings', icon: Settings, description: 'Ajustes' },
+  { name: 'Dashboard', href: '/app', icon: LayoutDashboard, description: 'Visão geral' },
+  { name: 'Investimentos', href: '/app/investments', icon: TrendingUp, description: 'Patrimônio' },
+  { name: 'Relatórios', href: '/app/reports', icon: BarChart3, description: 'Análises' },
+  { name: 'Planejamento', href: '/app/planning', icon: Target, description: 'Metas' },
+  { name: 'Histórico', href: '/app/history', icon: Clock, description: 'Transações' },
+  { name: 'Configurações', href: '/app/settings', icon: Settings, description: 'Ajustes' },
 ];
 
 export function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const finance = useFinance();
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    navigate('/auth');
+  };
 
   if (finance.isLoading) {
     return <LoadingScreen message="Carregando seus dados financeiros..." />;
@@ -53,7 +61,8 @@ export function Layout({ children }: LayoutProps) {
   const NavItems = () => (
     <>
       {navigation.map((item) => {
-        const isActive = location.pathname === item.href;
+        const isActive = location.pathname === item.href || 
+          (item.href === '/app' && location.pathname === '/app/');
         return (
           <Link
             key={item.name}
@@ -136,10 +145,14 @@ export function Layout({ children }: LayoutProps) {
               </p>
             </div>
             
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
-              <span className="font-medium">Sistema Online</span>
-            </div>
+            <Button
+              variant="outline"
+              className="w-full fintech-button text-danger hover:bg-danger/10"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
+            </Button>
           </div>
         </div>
       </aside>

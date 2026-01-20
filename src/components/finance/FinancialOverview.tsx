@@ -71,68 +71,6 @@ export function FinancialOverview({
 
   return (
     <div className="space-y-8">
-      {/* Enhanced Main Financial Health Indicator */}
-      <div className="fintech-card p-8 bg-gradient-to-br from-primary/5 via-card to-primary/5 hover:from-primary/8 transition-all duration-500">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className={cn(
-              'p-3 rounded-xl transition-all duration-300',
-              budgetHealth === 'excellent' || budgetHealth === 'good' 
-                ? 'bg-success/10 text-success' 
-                : 'bg-warning/10 text-warning'
-            )}>
-              <HealthIcon className="h-6 w-6" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">Visão Geral Financeira</h2>
-              <p className={cn('text-lg font-medium transition-colors duration-300', getHealthColor())}>
-                {getHealthMessage()}
-              </p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="fintech-label">Orçamento Utilizado</p>
-            <p className="text-3xl font-bold text-foreground">{spentPercentage.toFixed(0)}%</p>
-          </div>
-        </div>
-        
-        <div className="space-y-4">
-          <div className="flex justify-between text-sm">
-            <span className="fintech-label">Progresso do Orçamento</span>
-            <span className="font-medium">R$ {totalSpent.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} de R$ {totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-          </div>
-          <div className="relative">
-            <Progress 
-              value={Math.min(spentPercentage, 100)} 
-              className="h-3 bg-muted/50"
-            />
-            {spentPercentage > 100 && (
-              <div className="absolute top-0 right-0 h-3 w-2 bg-danger rounded-r animate-pulse" />
-            )}
-          </div>
-        </div>
-        
-        {daysLeftInMonth > 0 && (
-          <div className="mt-6 p-4 rounded-xl bg-muted/30 border border-border/50 hover:bg-muted/40 transition-colors duration-300">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Target className="h-5 w-5 text-primary animate-pulse" />
-                <div>
-                  <p className="fintech-label">Orçamento Diário Sugerido</p>
-                  <p className="text-lg font-semibold text-foreground">
-                    R$ {dailyBudget.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="fintech-label">Dias Restantes</p>
-                <p className="text-2xl font-bold text-primary">{daysLeftInMonth}</p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
       {/* Enhanced Metric Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
@@ -149,7 +87,7 @@ export function FinancialOverview({
           value={totalSpent}
           subtitle={`${spentPercentage.toFixed(0)}% da renda utilizada`}
           icon={TrendingDown}
-          variant={spentPercentage > 80 ? 'danger' : spentPercentage > 60 ? 'warning' : 'default'}
+          variant="danger"
           className="fade-in"
         />
         
@@ -158,7 +96,7 @@ export function FinancialOverview({
           value={investmentSpent}
           subtitle={`Meta: R$ ${investmentBudget.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
           icon={TrendingUp}
-          variant={investmentSpent >= investmentBudget ? 'success' : 'warning'}
+          variant="warning"
           className="fade-in"
         >
           <div className="mt-3">
@@ -178,9 +116,39 @@ export function FinancialOverview({
           value={availableToSpend}
           subtitle={availableToSpend < 0 ? 'Orçamento excedido' : 'Saldo restante'}
           icon={PiggyBank}
-          variant={availableToSpend < 0 ? 'danger' : 'success'}
+          variant="default"
           className={cn('fade-in', availableToSpend < 0 && 'pulse-glow')}
         />
+      </div>
+
+      {/* Financial Health Indicator */}
+      <div className="fintech-card p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={cn(
+              'p-2 rounded-lg',
+              budgetHealth === 'excellent' || budgetHealth === 'good' 
+                ? 'bg-success/10 text-success' 
+                : 'bg-warning/10 text-warning'
+            )}>
+              <HealthIcon className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="fintech-label">Status Financeiro</p>
+              <p className={cn('font-semibold', getHealthColor())}>
+                {getHealthMessage()}
+              </p>
+            </div>
+          </div>
+          {daysLeftInMonth > 0 && (
+            <div className="text-right">
+              <p className="fintech-label">Orçamento Diário</p>
+              <p className="text-lg font-bold text-primary">
+                R$ {dailyBudget.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Enhanced Credit Card Usage */}

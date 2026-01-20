@@ -162,11 +162,11 @@ export function AnalyticsDashboard({ expenses, totalIncome, selectedMonth }: Ana
               </div>
               <Progress 
                 value={Math.min(savingsRate, 100)} 
-                className="h-2"
-                indicatorClassName={cn(
-                  savingsRate > 20 ? 'bg-success' :
-                  savingsRate > 10 ? 'bg-warning' :
-                  'bg-danger'
+                className={cn(
+                  'h-2',
+                  savingsRate > 20 ? '[&>div]:bg-success' :
+                  savingsRate > 10 ? '[&>div]:bg-warning' :
+                  '[&>div]:bg-danger'
                 )}
               />
               <p className="text-sm text-muted-foreground">
@@ -195,11 +195,11 @@ export function AnalyticsDashboard({ expenses, totalIncome, selectedMonth }: Ana
               </div>
               <Progress 
                 value={Math.min((totalSpent / totalIncome) * 100, 100)} 
-                className="h-2"
-                indicatorClassName={cn(
-                  (totalSpent / totalIncome) > 0.9 ? 'bg-danger' :
-                  (totalSpent / totalIncome) > 0.7 ? 'bg-warning' :
-                  'bg-primary'
+                className={cn(
+                  'h-2',
+                  (totalSpent / totalIncome) > 0.9 ? '[&>div]:bg-danger' :
+                  (totalSpent / totalIncome) > 0.7 ? '[&>div]:bg-warning' :
+                  '[&>div]:bg-primary'
                 )}
               />
               <p className="text-sm text-muted-foreground">

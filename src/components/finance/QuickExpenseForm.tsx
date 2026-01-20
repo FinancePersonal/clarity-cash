@@ -49,12 +49,18 @@ export function QuickExpenseForm({ creditCards, selectedMonth, onSubmit }: Quick
   const [creditCardId, setCreditCardId] = useState('');
   const [showInBankStatement, setShowInBankStatement] = useState(false);
   const [installments, setInstallments] = useState('1');
+  const [currentInstallment, setCurrentInstallment] = useState('1');
+  const [currentInstallmentDate, setCurrentInstallmentDate] = useState(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  });
   const [firstInstallmentMonth, setFirstInstallmentMonth] = useState(() => {
     return `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`;
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!amount || parseFloat(amount) <= 0) return;
     if (paymentMethod === 'credit' && !creditCardId) {
       alert('Selecione um cartão de crédito');
@@ -63,23 +69,23 @@ export function QuickExpenseForm({ creditCards, selectedMonth, onSubmit }: Quick
 
     const totalAmount = parseFloat(amount);
     const installmentCount = parseInt(installments);
+    const currentInstallmentNum = parseInt(currentInstallment);
     
-    const [year, month] = firstInstallmentMonth.split('-').map(Number);
-    const firstInstallmentDate = new Date(year, month - 1, 1);
+    const [year, month, day] = currentInstallmentDate.split('-').map(Number);
+    const currentDate = new Date(year, month - 1, day);
     
     const threeMonthsAgo = new Date();
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
     
-    if (paymentMethod === 'credit' && installmentCount > 1 && firstInstallmentDate < threeMonthsAgo) {
-      alert('A primeira parcela não pode ser muito antiga. Selecione um mês mais recente.');
-      return;
-    }
-
     if (paymentMethod === 'credit' && installmentCount > 1) {
       const installmentAmount = totalAmount / installmentCount;
       
+      const firstInstallmentDate = new Date(currentDate);
+      firstInstallmentDate.setMonth(firstInstallmentDate.getMonth() - (currentInstallmentNum - 1));
+      
       for (let i = 0; i < installmentCount; i++) {
-        const installmentDate = new Date(year, month - 1 + i, selectedMonth.getDate());
+        const installmentDate = new Date(firstInstallmentDate);
+        installmentDate.setMonth(installmentDate.getMonth() + i);
         
         onSubmit({
           amount: installmentAmount,
@@ -115,6 +121,11 @@ export function QuickExpenseForm({ creditCards, selectedMonth, onSubmit }: Quick
     setCreditCardId('');
     setShowInBankStatement(false);
     setInstallments('1');
+    setCurrentInstallment('1');
+    setCurrentInstallmentDate(() => {
+      const today = new Date();
+      return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    });
     setFirstInstallmentMonth(`${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`);
     setIsOpen(false);
   };
@@ -247,23 +258,40 @@ export function QuickExpenseForm({ creditCards, selectedMonth, onSubmit }: Quick
                       </div>
                       
                       {parseInt(installments) > 1 && (
-                        <div className="space-y-2">
-                          <Label htmlFor="first-installment-month" className="text-sm font-medium">Mês da 1ª Parcela</Label>
-                          <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <>
+                          <div className="space-y-2">
+                            <Label htmlFor="current-installment" className="text-sm font-medium">Parcela Atual</Label>
                             <Input
-                              id="first-installment-month"
-                              type="month"
-                              value={firstInstallmentMonth}
-                              onChange={(e) => setFirstInstallmentMonth(e.target.value)}
-                              className="pl-10 h-10"
-                              required
+                              id="current-installment"
+                              type="number"
+                              placeholder="1"
+                              value={currentInstallment}
+                              onChange={(e) => setCurrentInstallment(e.target.value)}
+                              min="1"
+                              max={installments}
+                              className="h-10"
                             />
                           </div>
+                          
+                          <div className="space-y-2">
+                            <Label htmlFor="current-installment-date" className="text-sm font-medium">Data da Parcela Atual</Label>
+                            <div className="relative">
+                              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                              <Input
+                                id="current-installment-date"
+                                type="date"
+                                value={currentInstallmentDate}
+                                onChange={(e) => setCurrentInstallmentDate(e.target.value)}
+                                className="pl-10 h-10"
+                                required
+                              />
+                            </div>
+                          </div>
+                          
                           <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded-lg">
                             Valor por parcela: <span className="font-semibold">R$ {(parseFloat(amount || '0') / parseInt(installments)).toFixed(2)}</span>
                           </div>
-                        </div>
+                        </>
                       )}
                     </div>
                   )}

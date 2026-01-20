@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { FinanceState, Expense, Income, Investment, RecurringTransaction, BudgetRule, CreditCard, Goal, PlannedPurchase } from '@/types/finance';
 import { generateInstallments } from '@/lib/installments';
 import { getCreditCardUsageForMonth } from '@/lib/creditCard';
-import { userService } from '@/lib/userService';
+import { api } from '@/lib/api';
 
 const STORAGE_KEY = 'fintrack-data';
 
@@ -24,59 +24,46 @@ const defaultState: FinanceState = {
 export function useFinance() {
   const [state, setState] = useState<FinanceState>(defaultState);
   const [isLoading, setIsLoading] = useState(true);
-  const userId = userService.getUserId();
 
-  // Load data from localStorage on mount
+  // Load data from API on mount
   useEffect(() => {
-    const loadData = () => {
+    const loadData = async () => {
       try {
-        const stored = localStorage.getItem(`${STORAGE_KEY}-${userId}`);
-        if (stored) {
-          const parsedData = JSON.parse(stored);
-          // Convert date strings back to Date objects
-          const restoredData: FinanceState = {
-            ...parsedData,
-            selectedMonth: new Date(parsedData.selectedMonth || new Date()),
-            expenses: parsedData.expenses?.map((e: any) => ({
-              ...e,
-              date: new Date(e.date),
-            })) || [],
-            incomes: parsedData.incomes?.map((i: any) => ({
-              ...i,
-              date: new Date(i.date),
-            })) || [],
-            investments: parsedData.investments?.map((inv: any) => ({
-              ...inv,
-              date: new Date(inv.date),
-            })) || [],
-            goals: parsedData.goals?.map((g: any) => ({
-              ...g,
-              deadline: new Date(g.deadline),
-              createdAt: new Date(g.createdAt),
-            })) || [],
-          };
-          setState(restoredData);
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setIsLoading(false);
+          return;
+        }
+        const data = await api.getFinanceData();
+        if (data && Object.keys(data).length > 0) {
+          setState({
+            ...defaultState,
+            ...data,
+            selectedMonth: new Date(data.selectedMonth || new Date()),
+            expenses: data.expenses?.map((e: any) => ({ ...e, date: new Date(e.date) })) || [],
+            incomes: data.incomes?.map((i: any) => ({ ...i, date: new Date(i.date) })) || [],
+            investments: data.investments?.map((inv: any) => ({ ...inv, date: new Date(inv.date) })) || [],
+            goals: data.goals?.map((g: any) => ({ ...g, deadline: new Date(g.deadline), createdAt: new Date(g.createdAt) })) || [],
+          });
         }
       } catch (error) {
-        console.error('Error loading data from localStorage:', error);
-        setState(defaultState);
+        console.error('Error loading data:', error);
       } finally {
         setIsLoading(false);
       }
     };
-    
     loadData();
-  }, [userId]);
+  }, []);
 
-  // Save data to localStorage whenever state changes
-  const saveData = useCallback((newState: FinanceState) => {
+  // Save data to API whenever state changes
+  const saveData = useCallback(async (newState: FinanceState) => {
     if (isLoading) return;
     try {
-      localStorage.setItem(`${STORAGE_KEY}-${userId}`, JSON.stringify(newState));
+      await api.saveFinanceData(newState);
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      console.error('Error saving data:', error);
     }
-  }, [userId, isLoading]);
+  }, [isLoading]);
 
   useEffect(() => {
     saveData(state);

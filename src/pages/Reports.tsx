@@ -13,12 +13,26 @@ import {
   BarChart3,
   PieChart,
   Activity,
-  FileText
+  FileText,
+  Target
 } from 'lucide-react';
 import { PieChart as RechartsPieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { cn } from '@/lib/utils';
+import { Progress } from '@/components/ui/progress';
 
 const Reports = () => {
   const finance = useFinance();
+
+  if (finance.isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando relatórios...</p>
+        </div>
+      </div>
+    );
+  }
 
   const categoryData = [
     'Alimentação',
@@ -210,6 +224,114 @@ const Reports = () => {
         </TabsList>
 
         <TabsContent value="analytics" className="space-y-6">
+          {/* Financial Health Overview - Moved from top */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="fintech-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Target className="h-4 w-4 text-success" />
+                  Taxa de Poupança
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold text-foreground">
+                      {savingsRate.toFixed(1)}%
+                    </span>
+                    <Badge className={cn(
+                      savingsRate > 20 ? 'status-positive' :
+                      savingsRate > 10 ? 'status-warning' :
+                      'status-negative'
+                    )}>
+                      {savingsRate > 20 ? 'Excelente' :
+                       savingsRate > 10 ? 'Bom' : 'Baixo'}
+                    </Badge>
+                  </div>
+                  <Progress 
+                    value={Math.min(savingsRate, 100)} 
+                    className={cn(
+                      'h-2',
+                      savingsRate > 20 ? '[&>div]:bg-success' :
+                      savingsRate > 10 ? '[&>div]:bg-warning' :
+                      '[&>div]:bg-danger'
+                    )}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    R$ {(finance.totalMonthlyIncome - finance.totalSpent).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} poupados
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="fintech-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <BarChart3 className="h-4 w-4 text-primary" />
+                  Gasto vs Renda
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-bold text-foreground">
+                      {spentPercentage.toFixed(0)}%
+                    </span>
+                    <Badge variant="secondary">
+                      da renda
+                    </Badge>
+                  </div>
+                  <Progress 
+                    value={Math.min(spentPercentage, 100)} 
+                    className={cn(
+                      'h-2',
+                      spentPercentage > 90 ? '[&>div]:bg-danger' :
+                      spentPercentage > 70 ? '[&>div]:bg-warning' :
+                      '[&>div]:bg-primary'
+                    )}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    R$ {finance.totalSpent.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} gastos
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="fintech-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <PieChart className="h-4 w-4 text-warning" />
+                  Maior Categoria
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {categoryData.length > 0 ? (
+                    <>
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-bold text-foreground">
+                          {((categoryData[0].value / finance.totalSpent) * 100).toFixed(0)}%
+                        </span>
+                        <Badge variant="secondary">
+                          {categoryData[0].name}
+                        </Badge>
+                      </div>
+                      <Progress 
+                        value={(categoryData[0].value / finance.totalSpent) * 100} 
+                        className="h-2 [&>div]:bg-warning"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        R$ {categoryData[0].value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Nenhum gasto registrado</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           <AnalyticsDashboard 
             expenses={finance.currentMonthExpenses}
             totalIncome={finance.totalMonthlyIncome}
