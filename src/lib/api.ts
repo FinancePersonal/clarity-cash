@@ -1,50 +1,29 @@
-const API_URL = '/api';
+import axios from 'axios';
 
-const getToken = () => localStorage.getItem('token');
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
-const headers = () => ({
-  'Content-Type': 'application/json',
-  'Authorization': `Bearer ${getToken()}`
+export const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-export const api = {
-  async getFinanceData() {
-    const response = await fetch(`${API_URL}/finance`, {
-      headers: headers()
-    });
-    if (!response.ok) throw new Error('Failed to fetch finance data');
-    const text = await response.text();
-    return text ? JSON.parse(text) : {};
-  },
-
-  async saveFinanceData(data: any) {
-    const response = await fetch(`${API_URL}/finance`, {
-      method: 'PUT',
-      headers: headers(),
-      body: JSON.stringify(data)
-    });
-    if (!response.ok) throw new Error('Failed to save finance data');
-    const text = await response.text();
-    return text ? JSON.parse(text) : { success: true };
-  },
-
-  async login(email: string, password: string) {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    if (!response.ok) throw new Error('Login failed');
-    return response.json();
-  },
-
-  async register(email: string, password: string, name?: string) {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, name })
-    });
-    if (!response.ok) throw new Error('Registration failed');
-    return response.json();
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-};
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.location.href = '/auth';
+    }
+    return Promise.reject(error);
+  }
+);

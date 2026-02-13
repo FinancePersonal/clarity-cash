@@ -1,5 +1,6 @@
 import { MetricCard } from './MetricCard';
 import { Progress } from '@/components/ui/progress';
+import { CircularProgress } from '@/components/ui/circular-progress';
 import { cn } from '@/lib/utils';
 import { 
   Wallet, 
@@ -79,6 +80,7 @@ export function FinancialOverview({
           subtitle="Renda mensal disponível"
           icon={Wallet}
           variant="success"
+          tooltip="Soma da sua renda fixa mensal + receitas extras + receitas recorrentes ativas"
           className="fade-in"
         />
         
@@ -88,6 +90,7 @@ export function FinancialOverview({
           subtitle={`${spentPercentage.toFixed(0)}% da renda utilizada`}
           icon={TrendingDown}
           variant="danger"
+          tooltip="Total de gastos essenciais e pessoais do mês (não inclui investimentos)"
           className="fade-in"
         />
         
@@ -97,6 +100,7 @@ export function FinancialOverview({
           subtitle={`Meta: R$ ${investmentBudget.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
           icon={TrendingUp}
           variant="warning"
+          tooltip="Valor investido este mês. Meta baseada na regra de orçamento configurada"
           className="fade-in"
         >
           <div className="mt-3">
@@ -117,6 +121,7 @@ export function FinancialOverview({
           subtitle={availableToSpend < 0 ? 'Orçamento excedido' : 'Saldo restante'}
           icon={PiggyBank}
           variant="default"
+          tooltip="Saldo disponível após descontar gastos e investimentos da renda total"
           className={cn('fade-in', availableToSpend < 0 && 'pulse-glow')}
         />
       </div>
@@ -124,18 +129,20 @@ export function FinancialOverview({
       {/* Financial Health Indicator */}
       <div className="fintech-card p-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={cn(
-              'p-2 rounded-lg',
-              budgetHealth === 'excellent' || budgetHealth === 'good' 
-                ? 'bg-success/10 text-success' 
-                : 'bg-warning/10 text-warning'
-            )}>
-              <HealthIcon className="h-5 w-5" />
-            </div>
+          <div className="flex items-center gap-4">
+            <CircularProgress
+              value={spentPercentage}
+              max={100}
+              size="lg"
+              variant={
+                spentPercentage > 90 ? 'danger' :
+                spentPercentage > 75 ? 'warning' :
+                spentPercentage > 50 ? 'primary' : 'success'
+              }
+            />
             <div>
               <p className="fintech-label">Status Financeiro</p>
-              <p className={cn('font-semibold', getHealthColor())}>
+              <p className={cn('font-semibold text-lg', getHealthColor())}>
                 {getHealthMessage()}
               </p>
             </div>
@@ -145,6 +152,9 @@ export function FinancialOverview({
               <p className="fintech-label">Orçamento Diário</p>
               <p className="text-lg font-bold text-primary">
                 R$ {dailyBudget.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {daysLeftInMonth} dias restantes
               </p>
             </div>
           )}

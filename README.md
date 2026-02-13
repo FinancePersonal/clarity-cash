@@ -4,13 +4,13 @@
 
 ## 📖 Sobre o Projeto
 
-**Clarity Cash** é uma aplicação web moderna para gestão financeira pessoal, focada em simplicidade e clareza. Desenvolvida com React e TypeScript, oferece uma experiência intuitiva para controlar gastos, investimentos, cartões de crédito e metas financeiras.
+**Clarity Cash** é uma aplicação web moderna para gestão financeira pessoal, focada em simplicidade e clareza. Desenvolvida com React + TypeScript no frontend e Java Spring Boot no backend, oferece uma experiência intuitiva para controlar gastos, investimentos, cartões de crédito e metas financeiras.
 
 O projeto nasceu da necessidade de ter uma ferramenta de controle financeiro que seja:
 - ✨ **Simples** - Interface limpa sem complexidade desnecessária
 - 🎯 **Focada** - Apenas o essencial para controle financeiro efetivo
 - 🚀 **Rápida** - Experiência fluida e responsiva
-- 🔒 **Segura** - Dados armazenados com segurança no MongoDB
+- 🔒 **Segura** - Autenticação JWT e dados protegidos
 
 ## ✨ Funcionalidades
 
@@ -31,7 +31,7 @@ O projeto nasceu da necessidade de ter uma ferramenta de controle financeiro que
 
 ### 🎯 Planejamento
 - **Metas Financeiras** - Defina e acompanhe objetivos
-- **Orçamento Inteligente** - Sugestões baseadas na renda
+- **Orçamento Inteligente** - Regras 50/30/20, 50/20/30, 40/30/30 ou personalizado
 - **Controle de Investimentos** - Separação clara entre gastos e investimentos
 
 ### 🎨 Experiência do Usuário
@@ -50,20 +50,40 @@ O projeto nasceu da necessidade de ter uma ferramenta de controle financeiro que
 - **Recharts** - Gráficos interativos
 - **Lucide React** - Ícones
 - **React Router** - Navegação SPA
+- **Axios** - Cliente HTTP
 
 ### Backend
-- **Vercel Serverless Functions** - API endpoints
-- **MongoDB** - Banco de dados NoSQL
-- **JWT** - Autenticação
+- **Java 17+** - Linguagem
+- **Spring Boot** - Framework
+- **Spring Security** - Autenticação/Autorização
+- **JWT** - Tokens de autenticação
+- **PostgreSQL** - Banco de dados
+- **Swagger** - Documentação API
 
 ## 🚀 Como Executar
 
 ### Pré-requisitos
 - Node.js 18+
+- Java 17+
+- PostgreSQL
 - npm ou yarn
-- Conta MongoDB (Atlas ou local)
 
-### Instalação
+### Backend (Java)
+
+```bash
+# Clone o repositório do backend
+git clone https://github.com/seu-usuario/clarity-cash-api.git
+cd clarity-cash-api
+
+# Configure o banco de dados no application.properties
+# Compile e execute
+./mvnw spring-boot:run
+
+# API estará disponível em http://localhost:8080
+# Swagger em http://localhost:8080/swagger-ui.html
+```
+
+### Frontend (React)
 
 ```bash
 # Clone o repositório
@@ -75,7 +95,7 @@ npm install
 
 # Configure as variáveis de ambiente
 cp .env.example .env
-# Edite .env com suas credenciais MongoDB
+# Edite .env com a URL da API
 
 # Execute em desenvolvimento
 npm run dev
@@ -84,23 +104,18 @@ npm run dev
 ### Variáveis de Ambiente
 
 ```env
-MONGODB_URI=sua_connection_string_mongodb
-JWT_SECRET=seu_secret_jwt
+VITE_API_URL=http://localhost:8080/api
 ```
 
 ## 📦 Deploy
 
-### Vercel (Recomendado)
+### Backend
+- Heroku, Railway, Render ou qualquer plataforma Java
+- Configure variáveis de ambiente do banco de dados
 
-1. Conecte seu repositório no [Vercel](https://vercel.com)
-2. Configure as variáveis de ambiente no dashboard
-3. Deploy automático a cada push na main
-
-```bash
-# Ou via CLI
-npm i -g vercel
-vercel --prod
-```
+### Frontend
+- Vercel, Netlify ou qualquer plataforma de hospedagem estática
+- Configure `VITE_API_URL` para apontar para API em produção
 
 ## 🏗️ Arquitetura
 
@@ -111,20 +126,22 @@ vercel --prod
 │   - Pages                           │
 │   - Hooks                           │
 └──────────────┬──────────────────────┘
-               │ HTTP/REST
+               │ HTTP/REST + JWT
                ↓
 ┌─────────────────────────────────────┐
-│   API (Vercel Functions)            │
-│   - /api/auth/*                     │
-│   - /api/users                      │
+│   Backend (Spring Boot)             │
+│   - Controllers                     │
+│   - Services                        │
+│   - Repositories                    │
 └──────────────┬──────────────────────┘
-               │ MongoDB Driver
+               │ JPA/Hibernate
                ↓
 ┌─────────────────────────────────────┐
-│   MongoDB Atlas                     │
-│   Collection: users                 │
-│   - Auth data                       │
-│   - Finance data (embedded)         │
+│   PostgreSQL Database               │
+│   - users                           │
+│   - expenses                        │
+│   - credit_cards                    │
+│   - goals                           │
 └─────────────────────────────────────┘
 ```
 
@@ -132,45 +149,58 @@ vercel --prod
 
 ```
 clarity-cash/
-├── api/                    # Serverless functions
-│   ├── auth/
-│   │   ├── login.ts
-│   │   └── register.ts
-│   └── users.ts
 ├── src/
 │   ├── components/         # Componentes React
 │   │   ├── finance/       # Componentes financeiros
 │   │   └── ui/            # Componentes UI base
 │   ├── hooks/             # Custom hooks
-│   ├── lib/               # Utilitários e serviços
+│   ├── lib/               # Serviços e utilitários
+│   │   ├── api.ts        # Cliente Axios
+│   │   ├── auth.service.ts
+│   │   └── user.service.ts
 │   ├── pages/             # Páginas da aplicação
 │   └── App.tsx            # Componente raiz
 ├── public/                # Assets estáticos
-└── vercel.json           # Configuração Vercel
+└── .env.example          # Exemplo de variáveis
 ```
+
+## 🔐 API Endpoints
+
+### Autenticação
+- `POST /api/auth/login` - Login
+- `POST /api/auth/register` - Registro
+
+### Usuário (requer autenticação)
+- `GET /api/users/profile` - Buscar perfil
+- `PUT /api/users/profile` - Atualizar perfil
+- `DELETE /api/users` - Deletar conta
+
+Veja documentação completa em: `http://localhost:8080/swagger-ui.html`
 
 ## 🎯 Roadmap
 
 ### ✅ Concluído
 - [x] Interface completa e responsiva
-- [x] Sistema de autenticação
-- [x] Integração com MongoDB
-- [x] Gestão de cartões e parcelas
-- [x] Relatórios e gráficos
-- [x] Landing page moderna
-- [x] Deploy em produção
+- [x] Sistema de autenticação JWT
+- [x] Integração Frontend + Backend
+- [x] Gestão de perfil e configurações
+- [x] Landing page moderna com carrossel
+- [x] Regras de divisão financeira
 
 ### 🚧 Em Desenvolvimento
-- [ ] Notificações push
-- [ ] Modo offline completo
-- [ ] Importação de extratos bancários
+- [ ] CRUD completo de despesas
+- [ ] CRUD de cartões de crédito
+- [ ] CRUD de investimentos
+- [ ] CRUD de metas
+- [ ] Relatórios e analytics
 
 ### 🔮 Futuro
+- [ ] Notificações push
+- [ ] Importação de extratos bancários
 - [ ] Integração Open Banking
 - [ ] IA para categorização automática
 - [ ] App mobile nativo
 - [ ] Múltiplas moedas
-- [ ] Compartilhamento de orçamento familiar
 
 ## 🤝 Contribuindo
 

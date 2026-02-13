@@ -1,12 +1,14 @@
 import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, HelpCircle } from 'lucide-react';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
 
 interface MetricCardProps {
   title: string;
   value: number;
   subtitle?: string;
   icon: LucideIcon;
+  tooltip?: string;
   trend?: {
     value: number;
     isPositive: boolean;
@@ -21,6 +23,7 @@ export function MetricCard({
   value,
   subtitle,
   icon: Icon,
+  tooltip,
   trend,
   variant = 'default',
   className,
@@ -68,7 +71,14 @@ export function MetricCard({
     )}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <p className="fintech-label mb-1">{title}</p>
+          <div className="flex items-center gap-2 mb-1">
+            <p className="fintech-label">{title}</p>
+            {tooltip && (
+              <InfoTooltip content={tooltip}>
+                <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors cursor-help" />
+              </InfoTooltip>
+            )}
+          </div>
           <div className="flex items-baseline gap-2">
             <span className="fintech-metric">
               {formatCurrency(value)}

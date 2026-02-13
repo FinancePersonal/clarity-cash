@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Wallet2 } from 'lucide-react';
+import { authService } from '@/lib/auth.service';
 
 export default function Auth() {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,31 +22,15 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
-      const body = isLogin ? { email, password } : { email, password, name };
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Authentication failed');
-      }
-
       if (isLogin) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('userId', data.userId);
-        window.location.href = '/app';
+        await authService.login({ email, password });
+        navigate('/app');
       } else {
-        setIsLogin(true);
-        setError('Conta criada! Faça login.');
+        await authService.register({ name, email, password });
+        navigate('/app');
       }
     } catch (err: any) {
-      setError(err.message);
+      setError(err.response?.data?.message || err.message || 'Erro ao autenticar');
     } finally {
       setLoading(false);
     }

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ExpenseCategory, categoryLabels, categoryIcons, CreditCard } from '@/types/finance';
+import { useNotification } from '@/hooks/useNotification';
 
 interface QuickExpenseFormProps {
   creditCards: CreditCard[];
@@ -57,13 +58,14 @@ export function QuickExpenseForm({ creditCards, selectedMonth, onSubmit }: Quick
   const [firstInstallmentMonth, setFirstInstallmentMonth] = useState(() => {
     return `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`;
   });
+  const { success, error } = useNotification();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!amount || parseFloat(amount) <= 0) return;
     if (paymentMethod === 'credit' && !creditCardId) {
-      alert('Selecione um cartão de crédito');
+      error('Selecione um cartão', 'Escolha um cartão de crédito para continuar');
       return;
     }
 
@@ -128,6 +130,15 @@ export function QuickExpenseForm({ creditCards, selectedMonth, onSubmit }: Quick
     });
     setFirstInstallmentMonth(`${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`);
     setIsOpen(false);
+    
+    if (paymentMethod === 'credit' && installmentCount > 1) {
+      success(
+        'Parcelas criadas!',
+        `${installmentCount} parcelas de R$ ${(totalAmount / installmentCount).toFixed(2)} adicionadas`
+      );
+    } else {
+      success('Gasto adicionado!', `R$ ${totalAmount.toFixed(2)} registrado com sucesso`);
+    }
   };
 
   const categories = Object.entries(categoryLabels) as [ExpenseCategory, string][];

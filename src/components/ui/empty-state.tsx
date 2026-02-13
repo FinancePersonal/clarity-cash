@@ -1,0 +1,34 @@
+import { LucideIcon } from 'lucide-react';
+import { Button } from './button';
+import { cn } from '@/lib/utils';
+
+interface EmptyStateProps {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
+  className?: string;
+}
+
+export function EmptyState({ icon: Icon, title, description, action, className }: EmptyStateProps) {
+  return (
+    <div className={cn('flex flex-col items-center justify-center py-12 px-4 text-center', className)}>
+      <div className="relative mb-6">
+        <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full" />
+        <div className="relative p-6 rounded-2xl bg-muted/30 border border-border/50">
+          <Icon className="h-12 w-12 text-muted-foreground" />
+        </div>
+      </div>
+      <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
+      <p className="text-sm text-muted-foreground max-w-sm mb-6">{description}</p>
+      {action && (
+        <Button onClick={action.onClick} className="fintech-button">
+          {action.label}
+        </Button>
+      )}
+    </div>
+  );
+}

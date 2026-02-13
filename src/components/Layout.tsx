@@ -3,8 +3,12 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { LoadingScreen } from '@/components/ui/loading-screen';
+import { SkeletonCard } from '@/components/ui/skeleton';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { ShortcutsModal } from '@/components/ui/shortcuts-modal';
 import { useFinance } from '@/hooks/useFinance';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useTheme } from '@/hooks/useTheme';
 import { 
   LayoutDashboard, 
   BarChart3, 
@@ -16,7 +20,9 @@ import {
   Wallet2,
   Bell,
   ChevronRight,
-  LogOut
+  LogOut,
+  Shield,
+  Lock
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -24,19 +30,55 @@ interface LayoutProps {
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '/app', icon: LayoutDashboard, description: 'Visão geral' },
-  { name: 'Investimentos', href: '/app/investments', icon: TrendingUp, description: 'Patrimônio' },
-  { name: 'Relatórios', href: '/app/reports', icon: BarChart3, description: 'Análises' },
-  { name: 'Planejamento', href: '/app/planning', icon: Target, description: 'Metas' },
-  { name: 'Histórico', href: '/app/history', icon: Clock, description: 'Transações' },
-  { name: 'Configurações', href: '/app/settings', icon: Settings, description: 'Ajustes' },
+  { name: 'Dashboard', href: '/app', icon: LayoutDashboard, description: 'Visão geral', locked: false },
+  { name: 'Investimentos', href: '/app/investments', icon: TrendingUp, description: 'Patrimônio', locked: true },
+  { name: 'Relatórios', href: '/app/reports', icon: BarChart3, description: 'Análises', locked: true },
+  { name: 'Planejamento', href: '/app/planning', icon: Target, description: 'Metas', locked: true },
+  { name: 'Histórico', href: '/app/history', icon: Clock, description: 'Transações', locked: true },
+  { name: 'Admin', href: '/app/admin', icon: Shield, description: 'Painel Admin', locked: true },
+  { name: 'Configurações', href: '/app/settings', icon: Settings, description: 'Ajustes', locked: false },
 ];
 
 export function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const finance = useFinance();
+  const { setTheme } = useTheme();
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    {
+      key: 'n',
+      ctrl: true,
+      callback: () => document.querySelector('[data-testid="floating-action-button"]')?.click(),
+      description: 'Nova despesa',
+    },
+    {
+      key: 'd',
+      ctrl: true,
+      callback: () => navigate('/app'),
+      description: 'Dashboard',
+    },
+    {
+      key: 'r',
+      ctrl: true,
+      callback: () => navigate('/app/reports'),
+      description: 'Relatórios',
+    },
+    {
+      key: 't',
+      ctrl: true,
+      callback: () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark')),
+      description: 'Alternar tema',
+    },
+    {
+      key: '?',
+      callback: () => setShortcutsOpen(true),
+      description: 'Mostrar atalhos',
+    },
+  ]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -45,7 +87,41 @@ export function Layout({ children }: LayoutProps) {
   };
 
   if (finance.isLoading) {
-    return <LoadingScreen message="Carregando seus dados financeiros..." />;
+    return (
+      <div className="min-h-screen gradient-background">
+        <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:block lg:w-72">
+          <div className="flex h-full flex-col glass border-r border-border/30">
+            <div className="flex h-20 items-center border-b border-border/30 px-6">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="p-3 rounded-xl gradient-primary">
+                    <Wallet2 className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-foreground">Clarity Cash</h1>
+                  <p className="text-xs text-muted-foreground font-medium">Carregando...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+        <main className="lg:ml-72 pt-16 lg:pt-0">
+          <div className="container mx-auto px-6 lg:px-8 py-8 max-w-7xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </div>
+            <div className="grid lg:grid-cols-2 gap-8">
+              <SkeletonCard />
+              <SkeletonCard />
+            </div>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   const getFinancialStatus = () => {
@@ -63,6 +139,25 @@ export function Layout({ children }: LayoutProps) {
       {navigation.map((item) => {
         const isActive = location.pathname === item.href || 
           (item.href === '/app' && location.pathname === '/app/');
+        
+        if (item.locked) {
+          return (
+            <div
+              key={item.name}
+              className="group relative flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-medium opacity-50 cursor-not-allowed"
+            >
+              <item.icon className="h-5 w-5 text-muted-foreground" />
+              <div className="flex-1">
+                <span className="font-medium text-muted-foreground">{item.name}</span>
+                <p className="text-xs text-muted-foreground/70">
+                  {item.description}
+                </p>
+              </div>
+              <Lock className="h-4 w-4 text-muted-foreground" />
+            </div>
+          );
+        }
+        
         return (
           <Link
             key={item.name}
@@ -132,17 +227,29 @@ export function Layout({ children }: LayoutProps) {
           
           {/* Enhanced Status & Quick Stats */}
           <div className="border-t border-border/30 p-6 space-y-4">
-            <div className="fintech-card p-4 bg-gradient-to-br from-success/5 to-success/10 border-success/20">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tema</span>
+              <ThemeToggle />
+            </div>
+            
+            <div className="fintech-card p-4 bg-gradient-to-br from-success/5 to-success/10 border-success/20 hover:from-success/8 hover:to-success/12 transition-all duration-300">
               <div className="flex items-center justify-between mb-3">
-                <span className="fintech-label">Saldo Disponível</span>
-                <TrendingUp className="h-4 w-4 text-success animate-pulse" />
+                <span className="fintech-label-bold text-success">Disponível</span>
+                <TrendingUp className="h-4 w-4 text-success" />
               </div>
-              <p className="fintech-metric text-success mb-2">
+              <p className="fintech-metric-large text-success mb-1">
                 R$ {(finance.totalMonthlyIncome - finance.totalSpent).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </p>
-              <p className={cn('text-xs font-medium', status.color)}>
-                {status.text}
-              </p>
+              <div className="flex items-center gap-2 mt-2">
+                <div className={cn(
+                  'h-2 w-2 rounded-full animate-pulse',
+                  status.color === 'text-success' ? 'bg-success' :
+                  status.color === 'text-warning' ? 'bg-warning' : 'bg-danger'
+                )} />
+                <p className={cn('text-xs font-medium', status.color)}>
+                  {status.text}
+                </p>
+              </div>
             </div>
             
             <Button
@@ -216,10 +323,13 @@ export function Layout({ children }: LayoutProps) {
             </div>
           </div>
           
-          <Button variant="ghost" size="icon" className="fintech-button relative">
-            <Bell className="h-5 w-5" />
-            <div className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full animate-pulse" />
-          </Button>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <Button variant="ghost" size="icon" className="fintech-button relative">
+              <Bell className="h-5 w-5" />
+              <div className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full animate-pulse" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -229,6 +339,9 @@ export function Layout({ children }: LayoutProps) {
           {children}
         </div>
       </main>
+
+      {/* Shortcuts Modal */}
+      <ShortcutsModal isOpen={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
     </div>
   );
 }

@@ -3,7 +3,9 @@ import { Expense, categoryLabels, categoryIcons } from '@/types/finance';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { Trash2, CreditCard, Wallet } from 'lucide-react';
+import { EmptyState } from '@/components/ui/empty-state';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { Trash2, CreditCard, Wallet, Receipt } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
@@ -35,13 +37,19 @@ export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
   if (expenses.length === 0) {
     return (
       <Card>
-        <CardContent className="py-12 text-center">
-          <p className="text-muted-foreground">
-            Nenhum gasto registrado este mês
-          </p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Use o botão + para adicionar seu primeiro gasto
-          </p>
+        <CardHeader>
+          <CardTitle>Últimos Gastos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <EmptyState
+            icon={Receipt}
+            title="Nenhum gasto registrado"
+            description="Comece a controlar suas finanças adicionando seu primeiro gasto do mês"
+            action={{
+              label: 'Adicionar Gasto',
+              onClick: () => document.querySelector('[data-testid="floating-action-button"]')?.click()
+            }}
+          />
         </CardContent>
       </Card>
     );
@@ -75,9 +83,9 @@ export function ExpenseList({ expenses, onDelete }: ExpenseListProps) {
                   {expense.description || categoryLabels[expense.category]}
                 </p>
                 {expense.installments && (
-                  <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full font-medium">
+                  <StatusBadge variant="info">
                     {expense.installments.current}/{expense.installments.total}x
-                  </span>
+                  </StatusBadge>
                 )}
                 {expense.paymentMethod === 'credit' ? (
                   <CreditCard className="w-3 h-3 text-muted-foreground flex-shrink-0" />

@@ -1,5 +1,5 @@
 import { useFinance } from '@/hooks/useFinance';
-import { Onboarding } from '@/components/finance/Onboarding';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { DashboardHeader } from '@/components/finance/DashboardHeader';
 import { FinancialOverview } from '@/components/finance/FinancialOverview';
 import { FloatingActionButton } from '@/components/finance/FloatingActionButton';
@@ -23,17 +23,13 @@ import {
 
 const Index = () => {
   const finance = useFinance();
+  const { profile, loading: profileLoading } = useUserProfile();
 
-  if (!finance.isOnboarded) {
-    return (
-      <div className="max-w-2xl mx-auto">
-        <Onboarding onComplete={finance.completeOnboarding} />
-      </div>
-    );
-  }
+  // Usa o salário da API se disponível, senão usa o do finance
+  const totalMonthlyIncome = profile?.salary || finance.totalMonthlyIncome;
 
-  const availableToSpend = finance.totalMonthlyIncome - finance.totalSpent - finance.investmentSpent;
-  const totalAvailableBudget = finance.totalMonthlyIncome;
+  const availableToSpend = totalMonthlyIncome - finance.totalSpent - finance.investmentSpent;
+  const totalAvailableBudget = totalMonthlyIncome;
   
   const getDaysLeftInMonth = () => {
     const today = new Date();
@@ -44,7 +40,7 @@ const Index = () => {
   const daysLeft = getDaysLeftInMonth();
   
   const getBudgetHealth = (): 'excellent' | 'good' | 'warning' | 'danger' => {
-    const spentPercentage = (finance.totalSpent / finance.totalMonthlyIncome) * 100;
+    const spentPercentage = (finance.totalSpent / totalMonthlyIncome) * 100;
     if (spentPercentage <= 50) return 'excellent';
     if (spentPercentage <= 75) return 'good';
     if (spentPercentage <= 90) return 'warning';
@@ -52,11 +48,11 @@ const Index = () => {
   };
 
   const getSmartMessage = () => {
-    const spentPercentage = (finance.totalSpent / finance.totalMonthlyIncome) * 100;
+    const spentPercentage = (finance.totalSpent / totalMonthlyIncome) * 100;
     const totalUsed = finance.totalSpent + finance.investmentSpent;
-    const dailyBudget = (finance.totalMonthlyIncome - totalUsed) / Math.max(daysLeft, 1);
+    const dailyBudget = (totalMonthlyIncome - totalUsed) / Math.max(daysLeft, 1);
     
-    if (totalUsed > finance.totalMonthlyIncome) {
+    if (totalUsed > totalMonthlyIncome) {
       return {
         title: 'Orçamento excedido',
         subtitle: 'Considere revisar seus gastos este mês',
@@ -89,7 +85,7 @@ const Index = () => {
   const exportData = () => {
     const data = {
       month: finance.selectedMonth,
-      income: finance.totalMonthlyIncome,
+      income: totalMonthlyIncome,
       expenses: finance.currentMonthExpenses,
       summary: {
         totalSpent: finance.totalSpent,
@@ -162,7 +158,7 @@ const Index = () => {
       {/* Financial Overview */}
       <div className="mb-6">
         <FinancialOverview
-          totalIncome={finance.totalMonthlyIncome}
+          totalIncome={totalMonthlyIncome}
           totalSpent={finance.totalSpent}
           availableToSpend={availableToSpend}
           investmentSpent={finance.investmentSpent}
@@ -233,7 +229,7 @@ const Index = () => {
                   <span className="text-sm font-medium text-success">Receitas</span>
                 </div>
                 <p className="text-lg font-semibold text-foreground">
-                  R$ {finance.totalMonthlyIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  R$ {totalMonthlyIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
               </div>
               
@@ -313,6 +309,7 @@ const Index = () => {
         onAddIncome={finance.addIncome}
         onAddInvestment={finance.addInvestment}
         creditCards={finance.creditCards}
+        selectedMonth={finance.selectedMonth}
         className="shadow-2xl hover:shadow-primary/25"
       />
     </div>

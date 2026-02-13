@@ -359,7 +359,7 @@ const Reports = () => {
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
-                      label={({ name, value }) => `${name}: ${formatCurrency(value)}`}
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                     >
                       {categoryData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -385,7 +385,11 @@ const Reports = () => {
                     <XAxis dataKey="name" className="text-sm" />
                     <YAxis tickFormatter={(value) => `R$ ${value}`} className="text-sm" />
                     <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                    <Bar dataKey="value" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                      {typeData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -402,20 +406,13 @@ const Reports = () => {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={monthlyTrend}>
+                <BarChart data={monthlyTrend}>
                   <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                   <XAxis dataKey="month" className="text-sm" />
                   <YAxis tickFormatter={(value) => `R$ ${value}`} className="text-sm" />
                   <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                  <Line 
-                    type="monotone" 
-                    dataKey="gastos" 
-                    stroke="#2563eb" 
-                    strokeWidth={3}
-                    dot={{ fill: '#2563eb', strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, stroke: '#2563eb', strokeWidth: 2 }}
-                  />
-                </LineChart>
+                  <Bar dataKey="gastos" fill="#2563eb" radius={[8, 8, 0, 0]} />
+                </BarChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>

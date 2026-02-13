@@ -248,12 +248,36 @@
     @apply bg-card border border-border/50 rounded-xl shadow-finance backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:border-border/70;
   }
 
+  .fintech-card-primary {
+    @apply fintech-card border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10;
+  }
+
+  .fintech-card-success {
+    @apply fintech-card border-success/20 bg-gradient-to-br from-success/5 to-success/10;
+  }
+
+  .fintech-card-danger {
+    @apply fintech-card border-danger/20 bg-gradient-to-br from-danger/5 to-danger/10;
+  }
+
   .fintech-metric {
     @apply text-2xl font-semibold tracking-tight;
   }
 
+  .fintech-metric-large {
+    @apply text-3xl md:text-4xl font-bold tracking-tight;
+  }
+
+  .fintech-metric-small {
+    @apply text-lg font-semibold tracking-tight;
+  }
+
   .fintech-label {
     @apply text-sm font-medium text-muted-foreground;
+  }
+
+  .fintech-label-bold {
+    @apply text-sm font-semibold text-foreground uppercase tracking-wide;
   }
 
   .fintech-button {
@@ -276,10 +300,48 @@
   .progress-bar {
     transition: width var(--animation-duration) var(--animation-timing);
   }
+
+  /* Loading State */
+  .skeleton {
+    @apply animate-pulse bg-muted/50 rounded;
+  }
+
+  /* Interactive States */
+  .interactive-card {
+    @apply cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl active:scale-[0.98];
+  }
+
+  /* Success State */
+  .state-success {
+    @apply border-success/30 bg-success/5 animate-in fade-in duration-500;
+  }
+
+  /* Error State */
+  .state-error {
+    @apply border-danger/30 bg-danger/5 animate-in shake duration-500;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
   
   /* Smooth Fade In Animation */
   .fade-in {
     animation: fadeIn var(--animation-duration) var(--animation-timing) forwards;
+  }
+
+  .fade-in-up {
+    animation: fadeInUp 0.5s var(--animation-timing) forwards;
+  }
+
+  .slide-in-right {
+    animation: slideInRight 0.3s var(--animation-timing) forwards;
+  }
+
+  .scale-in {
+    animation: scaleIn 0.3s var(--animation-timing) forwards;
   }
   
   @keyframes fadeIn {
@@ -290,6 +352,39 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
     }
   }
   
@@ -304,6 +399,31 @@
     }
     50% {
       box-shadow: 0 0 20px hsl(var(--primary) / 0.6);
+    }
+  }
+
+  /* Accessibility Improvements */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+  }
+
+  /* High Contrast Mode Support */
+  @media (prefers-contrast: high) {
+    .fintech-card {
+      @apply border-2;
+    }
+  }
+
+  /* Reduced Motion Support */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
     }
   }
 }

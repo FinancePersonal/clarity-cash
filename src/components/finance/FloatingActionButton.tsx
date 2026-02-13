@@ -25,6 +25,7 @@ interface FloatingActionButtonProps {
   onAddIncome?: (income: any) => void;
   onAddInvestment?: (investment: any) => void;
   creditCards?: Array<{ id: string; name: string; }>;
+  selectedMonth: Date;
   className?: string;
 }
 
@@ -67,6 +68,7 @@ export function FloatingActionButton({
   onAddIncome,
   onAddInvestment,
   creditCards = [],
+  selectedMonth,
   className 
 }: FloatingActionButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -96,9 +98,9 @@ export function FloatingActionButton({
         category: category,
         paymentMethod: formData.paymentMethod || 'cash',
         type: expenseType,
-        date: new Date(),
-        month: new Date().getMonth(),
-        year: new Date().getFullYear()
+        date: new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1),
+        month: selectedMonth.getMonth(),
+        year: selectedMonth.getFullYear()
       };
 
       if (formData.paymentMethod === 'credit' && formData.creditCardId) {
@@ -153,18 +155,18 @@ export function FloatingActionButton({
       onAddIncome({
         description: formData.description,
         amount: parseFloat(formData.amount),
-        date: new Date(),
-        month: new Date().getMonth(),
-        year: new Date().getFullYear()
+        date: new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1),
+        month: selectedMonth.getMonth(),
+        year: selectedMonth.getFullYear()
       });
     } else if (activeTab === 'investment' && onAddInvestment) {
       onAddInvestment({
         description: formData.description,
         amount: parseFloat(formData.amount),
         category: formData.category as InvestmentCategory,
-        date: new Date(),
-        month: new Date().getMonth(),
-        year: new Date().getFullYear()
+        date: new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1),
+        month: selectedMonth.getMonth(),
+        year: selectedMonth.getFullYear()
       });
     }
 
